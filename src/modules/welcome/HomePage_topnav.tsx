@@ -122,29 +122,27 @@ const Header = () => {
         {/* Sitemap */}
         <button
           type="button"
-          className="tss-topbar-icon-btn flex-col gap-0.5 h-auto py-1 px-2"
+          className="tss-topbar-icon-btn px-2 h-auto py-1"
+          style={{ flexDirection: 'column', gap: '2px' }}
           onClick={handleSitemap}
           title={t('topnavi.title.siteMap')}
           aria-label={t('topnavi.title.siteMap')}
         >
-          <TssIcon iconKey="tss_sitemap" size={10} />
-          <span className="zoom-hide-text" style={{ fontSize: '9px', lineHeight: 1 }}>
-            {t('SiteMap')}
-          </span>
+          <TssIcon iconKey="tss_sitemap" size={14} />
+          <span style={{ fontSize: '9px', lineHeight: 1 }}>{t('SiteMap')}</span>
         </button>
 
         {/* Manual */}
         <button
           type="button"
-          className="tss-topbar-icon-btn flex-col gap-0.5 h-auto py-1 px-2"
+          className="tss-topbar-icon-btn px-2 h-auto py-1"
+          style={{ flexDirection: 'column', gap: '2px' }}
           onClick={downloadManual}
           title={t('topnavi.title.manual')}
           aria-label={t('topnavi.title.manual')}
         >
-          <TssIcon iconKey="tss_manual" />
-          <span className="zoom-hide-text" style={{ fontSize: '9px', lineHeight: 1 }}>
-            {t('topnavi.label.manual')}
-          </span>
+          <TssIcon iconKey="tss_manual" size={14} />
+          <span style={{ fontSize: '9px', lineHeight: 1 }}>{t('topnavi.label.manual')}</span>
         </button>
       </div>
 

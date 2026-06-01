@@ -14,11 +14,10 @@ const Main = () => {
   const dispatch = useDispatch();
 
   const menuSidebarCollapsed = useSelector((state: any) => state.ui.menuSidebarCollapsed);
-  const authentication = useSelector((state: any) => state.auth.authentication);
 
-  const handleToggleMenuSidebar = () => {
+  const handleToggleMenuSidebar = useCallback(() => {
     dispatch(toggleSidebarMenu());
-  };
+  }, [dispatch]);
 
   /* ---- Sync language preference on mount ---- */
   useEffect(() => {
@@ -35,23 +34,6 @@ const Main = () => {
         // non-critical — language falls back to default
       }
     };
-
-    const acctName  = localStorage.getItem('acctName');
-    const acctID    = localStorage.getItem('acctID');
-    const username  = localStorage.getItem('username');
-    const productId = localStorage.getItem('productId');
-    const serverIP  = localStorage.getItem('serverIP');
-    const clientIP  = localStorage.getItem('clientIP');
-    const sessionID = localStorage.getItem('sessionID');
-
-    localStorage.setItem('acctName',  acctName);
-    localStorage.setItem('acctID',    acctID);
-    localStorage.setItem('username',  username);
-    localStorage.setItem('productId', productId);
-    localStorage.setItem('serverIP',  serverIP);
-    localStorage.setItem('clientIP',  clientIP);
-    localStorage.setItem('sessionID', sessionID);
-
     languageDetails();
   }, []);
 
@@ -68,30 +50,44 @@ const Main = () => {
   }, [dispatch]);
 
   return (
-    /* Outer flex column takes the full viewport */
-    <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: 'var(--color-bg)' }}>
-
-      {/* ---- Fixed top navigation bar ---- */}
+    <>
+      {/* ── Fixed top navigation bar (out of normal flow) ── */}
       <Header />
 
-      {/* ---- Below topbar: sidebar + content side by side ---- */}
-      <div className="flex flex-1 overflow-hidden" style={{ paddingTop: 'var(--topbar-height)' }}>
-
-        {/* ---- Collapsible left sidebar ---- */}
+      {/*
+       * Body zone: sits below the fixed topbar.
+       * height = 100vh minus the topbar so it fills the remaining screen.
+       * flex-row lets sidebar and content sit side by side.
+       */}
+      <div
+        className="flex overflow-hidden"
+        style={{
+          height:    'calc(100vh - var(--topbar-height))',
+          marginTop: 'var(--topbar-height)',
+        }}
+      >
+        {/* ── Collapsible left sidebar ── */}
         <HomePage_leftbar />
 
-        {/* ---- Main scrollable content area ---- */}
+        {/*
+         * Main content column.
+         * margin-left matches the sidebar width so content never slides
+         * under the sidebar. Transition keeps it smooth on collapse.
+         */}
         <main
           id="rightSectionDiv"
           className="flex flex-col flex-1 overflow-hidden transition-all duration-200"
           style={{
-            marginLeft: menuSidebarCollapsed ? 'var(--sidebar-width-sm)' : 'var(--sidebar-width)',
+            marginLeft: menuSidebarCollapsed
+              ? 'var(--sidebar-width-sm)'
+              : 'var(--sidebar-width)',
+            backgroundColor: 'var(--color-bg)',
           }}
         >
-          {/* Breadcrumb / page title bar */}
+          {/* Breadcrumb / page-title bar */}
           <TssContentHeader />
 
-          {/* Page content */}
+          {/* Scrollable page content */}
           <div
             className="flex-1 overflow-y-auto tss-content-body"
             style={{ backgroundColor: 'var(--color-bg)' }}
@@ -104,7 +100,7 @@ const Main = () => {
         </main>
       </div>
 
-      {/* ---- Mobile sidebar overlay ---- */}
+      {/* ── Mobile sidebar backdrop ── */}
       {!menuSidebarCollapsed && (
         <div
           className="tss-sidebar-overlay lg:hidden"
@@ -113,7 +109,7 @@ const Main = () => {
           onKeyDown={() => {}}
         />
       )}
-    </div>
+    </>
   );
 };
 
