@@ -1,0 +1,85 @@
+{
+"PRODUCT_ID": 0,
+"PRODUCT_TITLE": "TSSGUI",	
+"PRODUCT_NAME":"TSSGUI",
+"PRODUCT_LOGO": "tayanaLogo.svg",
+"LOGIN_LOGO":["product.png","product1.png","product2.png"],
+"PRODUCT_LOGO_MIN":"tLogo.png",
+"SERVER_JS_API_URI" : "https://10.0.6.102:6488",
+"DATE_FORMAT":"YYYY-MM-DD",
+"DATETIME_FORMAT": "HH:mm:ss",
+"TssDataTable_Format": "YYYYMMDD_HHmmss",
+"TssDateTimeFormat" : "YYYY-MM-DD HH:mm:ss",
+"TssDateFormat" : "YYYY-MM-DD",
+"TssMonthFormat" : "YYYY-MM",
+"TssYearFormat":"YYYY",
+"SESSION_TIMEOUT":600,
+"LDAP_SUPPORT":0,
+"MIN_PWD_LENGTH":6,
+"MAX_PWD_LENGTH":10,
+"MIN_ACNT_NAME_LENGTH":4,
+"MAX_ACNT_NAME_LENGTH":20,
+"COUNTRY_CODE":"91",
+"MSISDN_LEN":10,
+"PWD_COMPLEXITY":3,
+"VERSION_STATUS":0,
+"ERROR_TIMEOUT":60000,
+"SUCCESS_TIMEOUT":30000,
+"STATUS" : {
+        "-2" : "All",
+        "0" : "Active",
+        "1" : "Disable",
+        "2" : "Locked",
+        "3" : "Expired"
+    },
+"ACCOUNT_STATUS" : {
+        "0" : "Active",
+        "1" : "Disable"
+    },
+
+"LINKS": [
+    {
+      "name": "Contact Us",
+      "url": "https://www.tayanamobility.com/contact/"
+    }
+  ],
+
+"POWERED_BY_URL":"https://www.tayanamobility.com/",
+
+
+
+"TSS_SERVER_API_URI" :"https://10.0.6.102:9008/tssgui/v1",
+"TSS_SERVER_API_USERNAME":"tssgui",
+"TSS_SERVER_API_PASSWORD":"tssgui",
+"SERVER_JS_API_PORT":6488,
+
+
+"MONTHS": ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"],
+"DISPLAY_DASHBOARD_ICON":true,
+"WARNING_TIMEOUT":6000,
+"ENABLE_OTP_LOGIN":1,
+"OTP_LENGTH_LOGIN":6,
+"OTP_Max_Retries":3,
+"OTP_Resend_Interval_Attempts":[
+     { "attempt": "1", "interval": "5" },
+     { "attempt": "2", "interval": "5" },
+     { "attempt": "3", "interval": "5" }
+    ],
+"SERVER_JS_API_IP": "10.0.6.102",
+"TssHourMinuteFormat":"HH:mm",
+"sysVersionId":0,
+"DEFAULT_THEME":"purple",
+"LOG_LEVEL": "INFO",
+"VIEW_DEPENDENT_PERMISSIONS":[2, 4, 8, 16],
+"DISPLAY_TRANSLATOR_ICON":true,
+"DISPLAY_PRODUCTS_ICON":true,
+"DISPLAY_THEMES_ICON":true,
+"DISPLAY_FILE_UPLOAD_ICON":true,
+"Configuration_MODULE_ACCESS_OPTIONS":[
+   {"label":"Hidden" ,"value":"0"},
+   {"label":"ReadOnly" ,"value":"1"},
+   {"label":"Editable" ,"value":"2"}  
+  ],
+ "encryptionKey":"-----BEGIN PUBLIC KEY----- MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkPhzUwK6GSwO0Uh3G4mk lwDu1RfIk+mUNhnvOEqVBrWc6zVOqNoY+XMueH+yAs0+k87baoVDMP6pyi3TUVpD AhlP+qe7cmhp9nogVkyG+1SALp5Q/i8DJTM5rbi5mO6DERhXxhzKj2DKRjPcjlhD Gi8GnSJ1YGPU3Fn901DvFsLecMsdzSTBgNkFV2g6dANUnH3Yyaw5/BCw23eLTwRY FGqGVbAFURvKsGL5dR2Ey40OSuwQk9K/DWRYWmIEt5yrSMByvP+VhzejhpMVn7eX uNv65BfyTml5/daVNJhjHPnEHdGMSnxCICcvbrYSlPSJMTu2NuMzOkeJcirYKj2w KQIDAQAB -----END PUBLIC KEY-----",
+    "TENANT_CODE":"DEFAULT"
+}

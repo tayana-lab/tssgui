@@ -1,0 +1,746 @@
+{
+    "topnavi":{
+        "label":{
+            "manual":"Manual",
+            "search":"Search",
+            "version":"Version",
+	    "products":"Products"
+        },
+        "language": {
+            "turkish": "Turkish",
+            "english": "English",
+            "german": "German",
+            "french": "French",
+            "spanish": "Spanish",
+            "hindi":"Hindi"
+        },
+        "title":{
+            "manual":"Click to get Manual",
+            "search":"Search",
+            "siteMap":"Site Map",
+            "language":"Click to change Language",
+            "version":"Version",
+            "profile":"Click to select Profile",
+            "theme":"Click to change Theme",
+            "dashboard":"Click to show Dashboard",
+	    "product":"Click to switch the Product",
+	    "fileUploadTracker":"Click to track File Upload"
+        },
+        "user":{
+            "profile":"Profile",
+            "signOut":"Sign Out",
+            "followers": "Followers",
+            "sales": "Sales",
+            "friends": "Friends"
+        }
+    },
+    "login": {
+        "label": {
+            "signIn": "Sign in to start your session",
+            "rememberMe": "Remember Me",
+            "forgotPass": "I forgot my password",
+            "registerNew": "Register a new membership"
+        },
+        "button": {
+            "signIn": {
+                "label": "Sign In",
+                "social": "Sign in using {{what}}"
+            },
+            "signUp": {
+                "label": "Sign Up",
+                "social": "Sign up using {{what}}"
+            },
+            "signOut": "Sign Out"
+        }
+    },
+
+    "bottomnavi":{
+        "label":{
+            "poweredBy":"Powered by",
+            "companyName":"Tayana Mobility Technologies"
+        },
+        "title":{
+        }
+    },
+    
+   "modules":{
+        "Generic":{
+            "header": {
+                "delete":"Delete"
+            },
+            "cfrmMsg":{
+                "add":"Are you sure you want to add?",
+                "modify":"Are you sure you want to modify?",
+                "delete":"Are you sure you want to delete?",
+                "copy":"Are you sure you want to copy?",
+                "assign":"Are you sure you want to assign?",
+                "upload":"Are you sure you want to upload?",
+                "send":"Are you sure you want to send?",
+                "download":"Are you sure you want to download?",
+                "approve":"Are you sure you want to approve?",
+		"reject":"Are you sure you want to reject"
+            },	      
+            "errorMsg":{
+                "mandatory":"Mandatory!",
+                "noSpacesAllowed":"Password should not start or end with space.",
+                "shldNotStartWithZero":"Should not start with zero!",
+                "alphaNumWithSpclCharNdSpace":"AlphaNumerals, .,_- and space allowed!",
+                "alphaNumWithUnderScore":"Can contain only alphanumeric characters and underscores!",
+                "alphaNumWithUnderScoreSpacehyphen":"Can contain only alphanumeric characters, Spaces, Hyphens and underscores!",
+                "startWithAlpha":"Must start with an alphabet",
+                "numericOnly":"Must be a numeric value!",
+                "numeral":"Please enter only numeric values for {{text}}",
+                "numericWithLength":"Enter only numeric values with min:{{min}} and max:{{max}} digits.",
+                "startWithAlphaNumeric" : "Should start with alphaNumeric!",
+                "alphanumwithonlyspace":"Should include only Alphanumeric charactes with only space",
+                "unsupportedChar":"Unsupported characters!",
+                "passwordMismatch": "Password Mismatch!",
+                "invalid": "Invalid!",
+                "invalidFormat" : "Invalid Format!",
+                "invalidLength" : "Invalid Length!",
+                "invalidPassword": "Invalid Password",
+                "minLen": "Min Length : {{minLen}}",
+                "maxLen": "Max Length : {{maxLen}}",
+                "minChar": "Min Characters : {{minChar}}",
+                "maxChar": "Max Characters : {{maxChar}}",
+                "minLenmaxLen": "Min Length : {{minLen}} & Max Length : {{maxLen}}",
+                "rangeBetween":"Must be between {{start}} & {{end}}",
+                "minCharmaxChar": "Min Characters : {{minChar}} & Max Characters : {{maxChar}}",
+                "failed":"Failed to fetch data",
+                "responseNotOk":"Response Not OK",
+                "chkDateTimeWithCurDate":"should be less than or equals to current date.",
+                "shldBeGreater":"should be greater than",
+                "checkAlphaUnderscorealphanumeral":"Please enter only alphanumeral (underscore is allowed) value for {{text}}",
+                "checkAlphawithSpecialcharacters":"Please enter only alphanumerical(-,& and space are allowed) with minimum length of {{min}} and maximum length of {{max}} value for {{text}}",
+                "checkAlphaUnderscorelength":"Please enter a value of length minimum of{{min}}and maximum of{{max}} for {{text}}",
+                "enterVal":"Mandatory!",
+                "enterValue":"Please enter value for {{text}} ",
+                "enterOnlyAlpha":"Please enter only alphabets for {{text}} ",
+                "valWithMinMaxLen":"Please enter a value having minimum length of {{min}} and maximum length of {{max}} for {{text}}",
+                "alphaNumWithSplCharAndSpace":"Please enter only alphanumeral value starting with alphabets (space ,-,_,.,(,),& allowed) for {{text}}",
+                "alphaNum":"Please enter only alphanumeric value for {{text}}",
+                "allZeros":"Invalid since {{text}} contains all zeros",
+                "numeric":"Please enter only numeric value for {{text}}",
+                "numericWithspclcharacter":"should not contain other characters or numbers after * for {{text}}",
+                "Addressnumeric":" length must be greater than {{min}} and less than {{max}} only. No special characters other than comma(,) and * is allowed.(at the end *(s) only   allowed)  for {{text}}",
+                "greaterOrLessThan":"Please enter a value of  greater than {{textMinVal}} and maximum of {{textMaxVal}} for {{text}}",
+                "intOrDecimal":"Please enter only integer or decimal value for {{text}}",
+                "hexaDec":"Please enter only HexaDecimal value for {{text}}",
+                "validEmail":"Please enter valid email Id for {{text}}",
+                "validText":"Please enter a valid {{text}}",
+                "atlstOneDigitAfterDec":"There should atleast one digit after decimal point for {{text}}",
+                "maxDec":"Enter max {{maxDec}} digits for decimal", 
+                "maxFloat":"Enter max {{maxFloat}} digits for floating.(Floating is not mandatory)",
+                "enterMsisdn":"Please Enter msisdn number",
+                "invalidCc":"Invalid country code",
+                "containsOnlyZero":"Invalid number- contains only zeros",
+                "msisdnRule":"Not proper MSISDN : Should start with '+' then country code: {{cc}} followed by mobile number and length should be {{msisdnLen}}",
+                "msisdnLen":"Length should be {{msisdnLen}}",
+                "enterNum":"Please enter number",
+                "numOnly":"Only numbers are allowed",
+                "msisdnLenVal":"{{text}} should have length of {{length}} or length should be {{ccAndLength}} including  cc as {{cc}}",
+                "numAndPlus":"Please enter only numbers and + is allowed",
+                "startWithPlusOrZero":"{{text}} should start with proper + or 0 or 00 or proper country code",
+                "startWithPlusOrZeroWithLen":"{{text}} should start with proper + or 0 or 00 or proper country code. {{text}} should have length of {{len}}",
+                "atleastOneAlpha":"{{text}} should contain atleast one alphabet",
+                "atleastOneLower":"{{text}} should contain atleast one lower case alphabet",
+                "atleastOneUpper":"{{text}} should contain atleast one upper case alphabet",
+                "atleastOneNum":"{{text}} should contain atleast one number",
+                "atleastOneSpcl": "{{text}} should contain atleast one special symbol",
+                "bannedWordsNotAllowed":"Banned words are not allowed",
+                "seqNotAllowed":"Sequential characters are not allowed",
+                "emailNotEmpty":"Email should not be empty",
+                "invalidEmailFormat":"Invalid Email format",
+                "invalidDomain":"Invalid domain",
+                "invalidChars":"{{text}} contains invalid characters",
+                "asciiChars": "{{text}} contains non ascii characters",
+                "contain@":"{{text}} must contain an @",
+                "notStartWith@":"{{text}} must not start with @",
+                "containOne@":"{{text}} must contain only one @",
+                "containPeriod" :"{{text}} must contain a period in the domain name",
+                "notImmediate@":"Period must not immediately follow @ in {{text}}",
+                "notImmediatePrecede":"Period must not immediately precede @ in {{text}}",
+                "noAdjacentPeriods":"Two periods must not be adjacent in {{text}}",
+                "invalidPrimaryDomain":"Invalid primary domain in {{text}}",
+                "pleaseSelect":"Please select {{text}}",
+                "lessThanCurDate":"{{text}} should be less than or equals to  current date",
+                "selectFromDate": "Please select {{ftext}}",
+                "selectToDate": "Please select {{ttext}}",
+                "dateGreaterThan":"{{ttext}} should be greater than {{ftext}}",
+                "dateNotGreaterThan":"{{text}} should not be greater than Current Date",
+                "selectFromDt":"Please select from date",
+                "selectToDt":"Please select to date",
+                "fromNotGreaterThanTo":"From Date should not be greater than To Date",
+                "dateDifferenceLimit":"Difference between dates should not exceed {{count}} days.",
+                "selectStartDt":"Please select Start date",
+                "selectEndDt":"Please select End date",
+                "selectDt":"Select date",
+                "dateRange":"Please select {{text}}  between  Start Date - {{fromDate}} and End Date - {{toDate}}",
+                "notStartWithZero":"{{text}} should not start with zero",
+                "cannotBeZero":"Cannot be zero",
+                "shouldNotBeNull":"{{text}} should not be null",
+                "alphaNumWithSpcl":"{{text}} should have only alphanumerals (.,_ allowed).",
+                "invalidHssHost":"{{text}} should have only alphanumerals (.,#|&-$() allowed).",
+                "alphaNumWithDot":"{{text}} should have only alphanumerals (. allowed).",
+                "enterValidIP":"Please enter valid IP Address for {{text}}" ,
+                "enterValid":"Please enter valid {{text}}",
+                "notStartWithDelim" : "{{text}} should not start with {{delim}}",
+                "notEndWithDelim" : "{{text}} should not end with {{delim}}",
+                "validNumWithoutZeroInitially":"Enter valid number for {{text}} without the initial number as Zero",
+                "langTextLen":"{{text}} should have min length 1 and max length {{len}} for {{language}} language.",
+                "valueBetween":"Please enter a value between {{min}} and {{max}} for {{text}}",
+                "shouldBeBetween":"{{text}} should be between {{start}} and {{end}}",
+                "validBinary":"Please enter only [0-9],[A-F] and spaces for {{text}}",
+                "invalidFrmt":"Invalid format for {{text}}",
+                "invalidFrmtNum":"{{text}} Invalid Format for {{no}} Enter only digits",
+                "invalidFrmtLen":"Invalid Format.{{text}} length should be {{len}}",
+                "invalidFrmtNumLen":"Invalid Format.{{text}} for {{no}} length should be {{len}}",
+                "invalidChar":"Invalid Characters!",
+                "onlyAlpha":"Alphabets only!",
+                "alphaNumericwithSpecificLengthforAplhaNum":"Enter minimum length of {{minNum}} and maximum length of {{maxNum}} digits (or) alphanumerics with special characters(only -,_,space are allowed) of {{minAlphaNum}} to {{maxAlphaNum}} characters.",
+                "onlyDigits":"Digits Only!",
+                "onlyAlphaNum":"AlphaNumeric only!",
+                "invalidInput":"Invalid Input!",
+                "dateLessThan":"{{text}} should be less than or equals to  current date.",
+                "fromGreaterThan":"{{toDt}} should be greater than {{fromDt}}",
+                "chkDiplayCodition":"Start with [a-zA-Z0-9]",
+                "alreadyExist":"Already Exists!",
+                "alphaUndscr":"Please enter only alphanumeral value and no other special characters other than _ for  {{text}}",
+                "notStartWithNum": "{{text}} should not start with number",
+                "sameCurPsswd": "Same as Current Password!",
+                "hostNameValidation":"only alphanumeral with or without(._) for {{text}} ",
+		"TimeFormatValidation":"Only alphanumeric (Space % : - / allowed) for {{text}}",
+	 	"alphaNumericWithAllSpecial":"Only alphaNumericWithAllSpecial allowed for {{text}}"	,
+        "alphanumwithspaceunderscore":	"Please enter only alphanumeric value, _ and spaces for {{text}}",
+                "minPasswordError":"Min {{min}} characters",
+                "maxPasswordError":"Max {{max}} characters",
+                "atleastOneCapitalLetter":"Atleast one capital Letter Mandatory",
+                "atleastOneNumber":"Atleast one number Mandatory",
+                "atleastOneSpecialChar":"Atleast one special Mandatory",
+                "atleastOneSmallLetter":"Atleast one small letter Mandatory",
+                "sameAsOldPassword":"Same as Current Password",
+		"hostNameValidate":" Only alphaNumeric & '_,-,*,.,space' only allowed",
+                "invalidIpAddress":"Invalid IP Address"
+            },	      
+            "TssDataTable":{
+                "button":{
+                    "title":{
+                        "edit":"Click to Edit",
+                        "delete":"Click to Delete",
+                        "copy":"Click to Copy",
+                        "download":"Click here to Download"
+                    }
+                }
+            },
+            "buttons":{
+                "title":{
+                        "add":"Click to Add",
+                        "refresh":"Click to Refresh",
+                        "delete":"Click to Delete",
+                        "close":"Click to Close",
+                        "copy":"Click to Copy",
+                        "clear":"Click to Clear",
+                        "modify":"Click to Edit",
+                        "reset":"Click to Reset",
+                        "go":"Click here to Go",
+                        "upload":"Click to Upload",
+                        "download":"Click to Download",
+                        "send":"Click to Send",
+                        "view":"Click to view Details",
+                        "moveAllRight":"Move all Right",
+                        "moveSingleRight":"Move single Right",
+                        "moveAllLeft":"Move all Left",
+                        "moveSingleLeft":"Move single left",
+
+                        "moveUp":"Move Up",
+                        "moveAbove":"Move single Above",
+                        "moveDown":"Move Down",
+                        "moveBelow":"Move single Below",
+			"search":"Click here to Search",
+			"approve":"Click here to Approve",
+			"reject":"Click here to Reject",
+			"downloadAttachment":"Click here to download the attachment"
+		
+                    },
+                    "label":{
+                        "confirm":"Confirm",
+                        "cancel":"Cancel",
+                        "close":"Close",
+                        "add":"Add",
+                        "modify":"Modify",
+                        "clear":"Clear",
+                        "assign":"Assign",
+                        "reset":"Reset",
+                        "delete":"Delete",
+                        "copy":"Copy",
+                        "proceed":"Proceed",
+	                "submit":"Submit",
+                        "search":"Search",
+                        "go":"Go",
+                        "preview":"Preview",
+                        "upload":"Upload",
+                        "download":"Download",
+                        "send":"Send",
+			"transfer":"Transfer",
+			"deAllocate":"Deallocate",
+			"checkall":"CheckAll",
+			"uncheckall":"UnCheckAll",
+			"view":"View",
+			"reject":"Reject"
+                    }
+                },
+                "alertMsg":{
+                    "add":"Failed to Add",
+                    "modify":"Failed to Modify",
+                    "delete":"Failed to delete",
+                    "data":"Failed to fetch data",
+                    "dataError":"Error fetching data : ",
+                    "dataSuccess":"Data fetched successfully : "
+                }
+            },
+        "profile":{
+            "tabLabel": {
+                "accountDetails": "Account Details ({{userName}})",
+                "changePassword": "Change Password ({{userName}})"
+            },
+            "label":{
+                "loginIp": "Login IP",
+                "acctType": "Account Type",
+                "lstLoginTime": "Last Login At",
+                "failedLoginTime": "Failed Login At",
+                "failedLoginIp": "Failed Login IP"
+            },
+            "accountDetails": {
+                "label": {
+                    "name": "Name",
+                    "designation": "Designation",
+                    "employeeId": "Employee Id",
+                    "dept": "Department",
+                    "mailId": "Mail Id",
+                    "mobileNum": "Mobile"
+                },
+                "placeholder": {
+                    "name": "Your Name",
+                    "designation": "Designation",
+                    "dept": "Department",
+                    "mailId": "Email",
+                    "mobileNum": "Mobile"
+                }
+            },
+            "changePassword":{
+                "label" : {
+                    "curPsswd" : "Password",
+                    "newPsswd" : "New Password",
+                    "cnfrmPsswd" : "Confirm Password"
+                },
+                "placeholder" : {
+                    "curPsswd" : "Enter your Current Password",
+                    "newPsswd" : "Enter the New Password",
+                    "cnfrmPsswd" : "Re-enter the New Password"
+                }
+            }
+        },
+        "AccountType":{
+            "label":"Account Type",
+            "cfrmPswdPage":{
+                "label":{
+                    "password":"Enter your Account Password"
+                },
+                "placeholder":{
+                    "password": "Password"
+                },
+                "buttons":{
+                    "title":{
+                        "confirm":"Confirm"
+                    }
+                }
+            },
+            "addAndModifyPage":{
+                "label":{
+                    "product":"Product",
+                    "accountGroup":"Account Group",
+                    "landPage":"Landing Page",
+                    "accountType":"Account Type",
+                    "accessType":"Access Type"
+                },
+                "placeholder":{
+                    "accountType": "Enter the Account Type",
+                    "accountGroup":"Select Group",
+                    "landPage":"Select Landing Page",
+                    "product":"Select Product"
+                },
+                "inputInfo":{
+                    "accountTypeInfo":"You can use letters,numbers and special characters . _ Use atleast {{minAccountNameLen}} characters"
+                },
+                "validation":{
+                    "moduleMandatory":"Select Atleast One Module!",
+                    "moduleCheck":"Some submodules are selected!"
+                }
+            },
+            "previewPage":{
+                "header": "Account Type Preview",
+                "TssDataTable":{
+                    "header":{
+                        "moduleName":"Module Name",
+                        "accessPerm":"Access Permission"
+                    },
+                    "body":{
+                        "noAccess":"No Access"
+                    }
+                }    
+            },
+            "viewPage":{
+                "label":"Account Type Details",
+                "TssDataTable":{
+                    "header":{
+                        "accountType":"Account Type",
+                        "product":"Product",
+                        "accountGroup":"Account Group",
+                        "noOfAccounts":"No of Accounts"
+                    }
+                }    
+            },
+            "deletePage":{
+                "validation":{
+                    "pswdMandatory":"Password cannot be empty",
+                    "invalidPswd":"Invalid Password!"
+                }
+            }
+        },
+
+        "Accounts":
+        {
+            "label":"Accounts",
+            "confirmPassword":
+            {
+                "label": 
+                {
+                    "password":"Enter your Account Password",
+                    "delete":"Delete"
+                },
+                "placeholder":
+                {
+                    "password": "Password"
+                }          
+            },
+        
+            "accountsView":
+            {
+                "tssDataTable":
+                {
+                    "statusCount":
+                    {
+                        "label":"Accounts Configuration",
+                        "header":
+                        {
+                            "product":"Product",
+                            "active":"Active",
+                            "disabled":"Disabled",
+                            "locked":"Locked",
+                            "expired":"Expired",
+                            "total":"Total"
+                        }
+                    },
+                    "filteredAccounts":
+                    {
+                        "label": "Accounts",
+                        "fileName":"Accounts",
+                        "header":
+                        {
+                            "loginId":"Login Id",
+                            "name":"Name",
+                            "status":"Status",
+                            "expiry":"Expiry",
+                            "created":"Created",
+                            "mailId":"Mail Id",
+                            "mobile":"Mobile",
+                            "ldapUser":"LDAP User",
+                            "level":"Level",
+                            "accountType":"Account Type"
+                        }
+                    }
+                },
+                "label" :
+                {
+                    "product":"Product",
+                    "accountType":"Account Type",
+                    "accountStatus":"Account Status"
+                },
+                "placeholder" :
+		{
+		   "accountType":"Select Account Type"
+		}
+            },
+    
+            "accountAddAndModify":
+            {
+                "label":
+                {
+                    "loginId":"Login Id",
+                    "password":"Password",
+                    "confirmPassword":"Confirm Password",
+                    "employeeId":"Employee Id",
+                    "accountExpiry":"Account Expiry",
+                    "accountStatus":"Account Status",
+                    "name":"Name",
+                    "designation":"Designation",
+                    "department":"Department",
+                    "mailId":"Mail Id",
+                    "mobile":"Mobile",
+                    "preferredLanguage":"Preferred Language",
+                    "ldapUser":"LDAP User",
+                    "accountType":"Account Type",
+                    "noAccessOption":"No Access"
+                },
+                "placeholder":
+                {
+                    "loginId":"Enter the Login Id",
+                    "password":"Enter the Password",
+                    "confirmPassword":"Re-enter the Password",
+                    "employeeId":"Enter the Employee Id",
+                    "accountExpiry":"Select Account Expiry",
+                    "accountStatus":"Select Account Status",
+                    "name":"Enter the Name",
+                    "designation":"Enter the Designation",
+                    "department":"Enter the Department",
+                    "mailId":"Enter the email",
+                    "mobile":"Enter the mobile number",
+                    "accountType":"Select Account Type"
+                },
+                "inputInfo":
+                {
+                    "loginId":"You can use Letters or Numbers, use at least {{minChar}} characters.",
+                    "password":"Use atleast {{minLen}} characters",
+                    "name":"You can use letters,numbers and special characters . _ Use atleast {{minChar}} characters"
+                },
+				"alert" : "Select Account Type For Atleast one product",
+                "tssDataTable" :
+                {
+                    "label":"Access Details",
+                    "header":
+                    {
+                        "product":"Product",
+                        "accountType":"Account Type"
+                    }
+                },
+                "modalHeader":"Preview Account Details"
+            }
+        },
+        "tracker":
+        {
+            "label":"Activity Tracker",
+            "filter":
+            {
+		"product":"Product",
+                "modAccount":"Modified Account",
+                    "account":"Account",
+                "event":"Event",
+                "fDate":"From Date",
+                "tDate":"To Date"
+            },
+            "auditTracker":
+            {
+                "label":"Audit-System",
+                "viewPage":
+                {
+                    "label":"System Audit Details",
+                    "fileName":"SystemAuditDetails",
+                    "TssDataTable":{
+                        "header":{
+                            "time":"Time",
+                            "account":"Account",
+                            "product":"Product",
+                            "event":"Event",
+                            "state":"State",
+                            "ip":"IP",
+                            "sessionId":"SessionId"
+                        }
+                    },
+                    "validation":
+                    {
+                        "searchAlert":"Your search returned a large number of results. Narrow your search"
+                    }
+                }
+            },
+            "provTracker":
+            {
+                "tab":"Audit-Provisioning",
+                "fileName": "ProvisioningAuditDetails",
+                
+                "label":
+                {   
+                    "product":"Product",
+                    "account":"Account",
+                    "events":"Event(s)",
+                    "fDate":"From Date",
+                    "tDate":"To Date",
+                    "allOption":"All"
+                },
+                "placeholder":{
+                    "events":"All Events"
+                },
+                "title":{
+                    "search":"Click to Search"
+                } ,
+                "tssDataTable":{
+                    "label":"Provisioning Audit Details",
+                    "header":{
+                        "time":"Time",
+                        "account":"Account",
+			"product":"Product",
+                        "ip":"IP",
+                        "event":"Event",
+                        "before":"Before",
+                        "after":"After",
+                        "version":"Version"
+                    }
+                } ,
+                "predefined":{
+                    "label":"Predefined",
+                    "1":"Last 1 Hour",
+                    "2":"Last 6 Hours",
+                    "3":"Today",
+                    "4":"Yesterday",
+                    "5":"Last 7 Days",
+                    "6":"Last 30 Days",
+                    "7":"This Month"
+                },
+                "infoAlert":{
+                    "startDate":"Start Date should be lesser than End Date",
+                    "endDate":"To Date should be greater than Start Date"
+                }  
+            }
+        },
+        
+        "ResetPassword":{
+            "label":{
+                "loginId":"Login ID",
+                "newPassword":"New Password",
+                "confirmPassword":"Confirm Password",
+                "acctPassword":"Enter your Account Password"
+            },
+            "placeholder":{
+                "loginId":"Select Login ID",
+                "newPassword":"Enter the New Password",
+                "confirmPassword":"Re-enter the New Password",
+                "acctPassword":"Password"
+            }
+        },
+       "FileUploadTracker":{
+	   "viewPage":{
+ 	     "label":"File Upload Details",
+	     "fileName":"FileUploadDetails",
+	     "TssDataTable":{
+		"header":{
+		  "time":"Time",
+		  "fileName":"File Name",
+		  "txnId":"Transaction ID",
+		  "uploadedBy":"Uploaded By",
+		  "submitted":"Submitted",
+		  "processed":"Processed",
+		  "rejected":"Rejected",
+		  "dropped":"Dropped",
+		  "status":"Status"
+		}
+	     }
+	   },
+	   "filter":{
+	      "fDate":"From Date",
+	      "tDate":"To Date",
+	      "txnId":"Transaction ID"
+	   }
+	}
+},
+
+    "components":{
+        "TssDataTable":{
+            "pagination":{
+                "label":{
+                    "columns":"Columns",
+                    "show":"Show",
+                    "showing":"Showing",
+                    "entries":"Entries",
+                    "to":"to",
+                    "of":"of",
+                    "all":"All"
+                }
+            },
+            "placeholder":{
+                "search":"Search",
+                "emptyMessage":"No Rows found"
+            },
+            "title":{
+                "download":{
+                    "copy":"Copy",
+                    "excel":"Excel",
+                    "pdf":"PDF",
+                    "csv":"CSV",
+                    "print":"Print"
+                },
+              "fullScreen":"Click here to view table in fullscreen"
+            },
+            "copy":{
+                "successText":"All rows copied to clipboard!",
+                "failureText":"Failed to copy rows. Please try again."
+            },
+            "downloadFileText":{
+                "printText":"Generated by {{clientName}} on {{printDate}}",
+		"tss-validIcon":"Enable",
+		"tss-inValidIcon":"Disable"
+            }
+        }
+    },
+    "MISRep":{
+        "total" : "Total",
+        "day":"Day",
+        "month":"Month",
+        "year":"Year"
+    },
+"Configuration": {
+      "label": "Configuration Details",
+      "ConfigurationView": {
+        "Parameter": "Parameter",
+        "ConfigValue": "Config Value",
+        "DefaultValue": "Default Value",
+        "description": "Description"
+      },
+      "EditPage": {
+        "fields": {
+          "ConfigKey": "Config Key",
+          "DefaultValue": "Default Value",
+          "MinLength": "Min Length",
+          "LastModifiedBy": "Last Modified By",
+          "Comment": "Comment",
+          "Reloadable": "Reloadable",
+          "MaxLength": "Max Length",
+          "LastModifiedTime": "Last Modified Time",
+          "Comment": "Comment",
+          "ConfigValue": "Config Value",
+          "ChangeComment":"Change Comment",
+          "MinValue":"Min Value",
+          "MaxValue":"Max Value"
+ 
+        },
+          "Placeholder":{
+          "ConfigValue": "Enter Config Value",
+          "ConfiggValueMultiSelect":"Select Config Value"
+        }
+        },
+        "historyDetails": {
+          "historyLabel":"History Details",
+          "ModifiedTime": "Modified Time",
+          "ModifiedBy": "Modified By",
+          "OldValue": "Old Value",
+          "NewValue": "New Value",
+          "Comment": "Comment"
+      },
+      "ConfigurationOperations": {
+        "ConnectionFailMsg": "Failed to connect to server"
+      },
+      "ErrMsg":{
+       "InavlidParam":"Invalid Param Value",
+       "optionSelect":"Please Select Config Param Value"
+      }
+    }
+
+} 

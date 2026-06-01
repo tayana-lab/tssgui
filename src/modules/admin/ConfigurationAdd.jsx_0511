@@ -1,0 +1,932 @@
+import React, { useState, useEffect, useRef } from 'react';
+import TssSelectBox from '@app/modules/common/default/components/TssSelectBox';
+import TssTextBox from '@app/modules/common/default/components/TssTextBox';
+import TssTextArea from '@app/modules/common/default/components/TssTextArea';
+import TssIPAddress from '@modules/common/default/components/TssIPAddress';
+import TssButton from '@app/modules/common/default/components/TssButton';
+import TssMultiSelectBox from '@app/modules/common/default/components/TssMultiSelectBox';
+import TssCheckbox from '@app/modules/common/default/components/TssCheckbox';
+import TssRadioButton from '@modules/common/default/components/TssRadioButton';
+import TSSInputGroup from '@app/modules/common/default/components/TssInputGroup';
+import TssDataTable from '@app/modules/common/default/components/TssDataTable';
+import TssTable from '@app/modules/common/default/components/TssTableComponent'
+import TssDatePicker from '@app/modules/common/default/components/TssDatePicker';
+import moment from 'moment';
+import TssIcon from '@app/modules/common/default/components/TssIcon';
+import TssModal from '@app/modules/common/default/components/TssModal';
+import TssSelectBoxSearch from '@modules/common/default/components/TssSelectBoxSearch';
+import TssPanel from '@modules/common/default/components/TssPanel';
+import { toast } from 'react-toastify';
+import { confirmAction, infoAlert, showToast } from '@app/modules/common/default/components/TssFunction';
+import { useTranslation } from 'react-i18next';
+import Log from '@app/modules/common/default/components/TssGUILog';
+import encryptPayload from '@app/modules/common/default/js/encryptPayload.js';
+import tssguiConf from '@modules/conf/TssGui.json'
+import { alphaNumericWithAllSpecial, numericValueValidationVal, validateIPAddr, alphaValidation, alphaNumericValidation, hexadecimalValidation, checkNullAndLength, emailIdValidation, allcharactersvalidation } from '@app/modules/common/default/js/validate.js'
+
+
+const ConfigurationAdd = ({ LoadAddPage, LoadSearchPage, closeAddPage, tempVariable, setTempVariable, types, checkPermission }) => {
+  const timePeriodId = types && types.timePeriodId ? types.timePeriodId : '';
+  const configKey = types && types.configKey ? types.configKey : '';
+  const addPermission = (checkPermission & 4) == 4;
+  const modPermission = (checkPermission & 2) == 2;
+  const clientName = localStorage.getItem("acctName");
+  const productId = localStorage.getItem("productID");
+  const clientID = localStorage.getItem("acctID");
+  const clientIP = localStorage.getItem("clientIP");
+  const serverIP = localStorage.getItem("serverIP");
+  const sessionID = localStorage.getItem("sessionID");
+  const userName = localStorage.getItem("username");
+  const sysVersionId = tssguiConf.sysVersionId;
+
+  const Url = tssguiConf.SERVER_JS_API_URI;
+
+  const AccessTypeoptions = tssguiConf.Configuration_MODULE_ACCESS_OPTIONS;
+
+  const [t] = useTranslation();
+  const [showAddDiv, setShowAddDiv] = useState(LoadAddPage);
+  const [showEditDiv, setshowEditDiv] = useState(LoadSearchPage);
+  const [Confirmmodal, setConfirmmodal] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+
+  const getLabelFromvalue = (value, options) => {
+    const option = options.find(opt => opt.value === value);
+    return option ? option.label : null;
+  }
+
+  const getValueFromLabel = (label, options) => {
+    const option = options.find(opt => opt.label === label);
+    return option ? option.value : null;
+  };
+
+  const [ConfigKeyDataList, setConfigKeyDataList] = useState([]);
+  const [ConfigListDataList, setConfigListDataList] = useState([]);
+
+
+  const [ConfigValue, setConfigValue] = useState('');
+  const [ConfigValuekey, setConfigValuekey] = useState(0);
+  const [ConfigValueErrorTheme, setConfigValueErrorTheme] = useState('form');
+  const [ConfigValueErrorMessage, setConfigValueErrorMessage] = useState('');
+
+  const [AccessType, setAccessType] = useState({ label: "", value: "" });
+  const [AccessTypeDefault, setAccessTypeDefault] = useState({ label: "", value: "" });
+  const [AccessTypekey, setAccessTypekey] = useState(0);
+  const [AccessTypeErrorMessage, setAccessTypeErrorMessage] = useState('');
+  const [AccessTypeErrorTheme, setAccessTypeErrorTheme] = useState('selectForm');
+
+
+  const [PassConfigValue, setPassConfigValue] = useState('');
+  const [PassConfigValuekey, setPassConfigValuekey] = useState(0);
+  const [PassConfigValueErrorTheme, setPassConfigValueErrorTheme] = useState('form');
+  const [PassConfigValueErrorMessage, setPassConfigValueErrorMessage] = useState('');
+
+
+  const RadioConfigEnable = [{ label: "Enable", value: 1, defaultChecked: true }];
+  const RadioConfigDisable =  [ { label: "Disable", value: 0,defaultChecked: true }];
+
+  const [ConfigRadioEnablevaluedefault,setConfigRadioEnablevaluedefault]=useState(false);
+  const [ConfigEnableRadiovalue, setConfigEnableRadiovalue] = useState('');
+  const [ConfigEnableRadiovaluekey, setConfigEnableRadiovaluekey] = useState(0);
+
+  const [ConfigRadioDisablevaluedefault,setConfigRadioDisablevaluedefault]=useState(false);
+  const [ConfigDisableRadiovalue, setConfigDisableRadiovalue] = useState('');
+  const [ConfigDisableRadiovaluekey, setConfigDisableRadiovaluekey] = useState(0);
+
+  const [ConfigRegularExpression, setConfigRegularExpression] = useState('');
+  const [ConfigRegularExpressionkey, setConfigRegularExpressionkey] = useState(0);
+  const [ConfigRegularExpressionErrorMessage, setConfigRegularExpressionErrorMessage] = useState('');
+  const [ConfigRegularExpressionErrorTheme, setConfigRegularExpressionErrorTheme] = useState('form');
+
+  const [ConfigValueMultiSelectkey, setConfigValueMultiSelectkey] = useState(0);
+  const [ConfigValueMultiSelect, setConfigValueMultiSelect] = useState([]);
+  const [ConfigValueMultiSelectErrorMessage, setConfigValueMultiSelectErrorMessage] = useState('');
+  const [ConfigValueMultiSelectErrorTheme, setConfigValueMultiSelectErrorTheme] = useState('selectForm');
+  const [DefaultConfigValueMultiSelect, setDefaultConfigValueMultiSelect] = useState([]);
+
+
+  const [ConfigValueSingleSelectkey, setConfigValueSingleSelectkey] = useState(0);
+  const [ConfigValueSingleSelectErrorMessage, setConfigValueSingleSelectErrorMessage] = useState('');
+  const [ConfigValueSingleSelectErrorTheme, setConfigValueSingleSelectErrorTheme] = useState('selectForm');
+  const [ConfigValueSingleSelect, setConfigValueSingleSelect] = useState([]);
+  const [DefaultConfigValueSingleSelect, setDefaultConfigValueSingleSelect] = useState({});
+
+  const [ConfigValueTextArea, setConfigValueTextArea] = useState('');
+  const [ConfigValueTextAreakey, setConfigValueTextAreakey] = useState(0);
+  const [ConfigValueTextAreaErrorTheme, setConfigValueTextAreaErrorTheme] = useState('form');
+  const [ConfigValueTextAreaErrorMessage, setConfigValueTextAreaErrorMessage] = useState('');
+
+  const [ChangeComment, setChangeComment] = useState('');
+  const [ChangeCommentkey, setChangeCommentkey] = useState(0);
+  const [ChangeCommentErrorTheme, setChangeCommentErrorTheme] = useState('form');
+  const [ChangeCommentErrorMessage, setChangeCommentErrorMessage] = useState('');
+
+  const [Comment, setComment] = useState('');
+  const [Commentkey, setCommentkey] = useState(0);
+  const [CommentErrorTheme, setCommentErrorTheme] = useState('form');
+  const [CommentErrorMessage, setCommentErrorMessage] = useState('');
+  const [tempSingleSelectValue, setTempSingleSelectValue] = useState('');
+
+
+
+
+
+  useEffect(() => {
+    if (types) {
+      if (types.configValue) {
+        if (types.fieldType === "T") {
+          setConfigValue(types.configValue);
+        } else if (types.fieldType === "A") {
+          setConfigValueTextArea(types.configValue)
+        } else if (types.fieldType === "R") {
+          const radiovalue=types.configValue;
+          if(radiovalue ==1 || radiovalue ==="1")
+          {
+            setConfigEnableRadiovalue(1);
+            setConfigRadioEnablevaluedefault(true);
+            setConfigEnableRadiovaluekey(prevKey => prevKey + 1);
+          }
+          else if(radiovalue ==0 || radiovalue ==="0")
+            {
+              setConfigDisableRadiovalue(0);
+              setConfigRadioDisablevaluedefault(true);
+              setConfigDisableRadiovaluekey(prevKey => prevKey + 1);
+          }
+        } else if (types.fieldType === "P") {
+          setPassConfigValue(types.configValue)
+        } else if (types.fieldType === "L") {
+          // Save the raw value temporarily
+          const SingleSelConfigVal = types.configValue.toString();
+          setTempSingleSelectValue(SingleSelConfigVal); // new state
+        }
+      }
+    }
+  }, [types]);
+
+  useEffect(() => {
+    // Once ConfigListDataList is ready and we have a value to match
+    if (tempSingleSelectValue && ConfigListDataList.length > 0) {
+      const label = getLabelFromvalue(tempSingleSelectValue, ConfigListDataList);
+      const VSingleSelConfigVal = {
+        label: label,
+        value: tempSingleSelectValue
+      };
+      setDefaultConfigValueSingleSelect(VSingleSelConfigVal);
+      setConfigValueSingleSelect(VSingleSelConfigVal);
+      setConfigValueSingleSelectkey(prevKey => prevKey + 1);
+    }
+  }, [ConfigListDataList, tempSingleSelectValue]);
+
+
+  useEffect(() => {
+    if (types?.fieldType === "M" && types.configValue && ConfigListDataList.length > 0) {
+      const val = types.configValue.split(',').map(v => v.trim());
+
+      const mappedOptions = val.map(val => ({
+        label: getLabelFromvalue(val, ConfigListDataList),
+        value: val
+      }));
+
+
+      setConfigValueMultiSelect(mappedOptions);
+      setDefaultConfigValueMultiSelect(mappedOptions); // or any default state
+      setConfigValueMultiSelectkey(k => k + 1);
+    }
+  }, [ConfigListDataList, types]);
+
+
+
+  useEffect(() => {
+    if (types && types.accessLevel) {
+      const value = types.accessLevel.toString();
+      const label = getLabelFromvalue(value, AccessTypeoptions);
+      const accesstype = ({ label: label, value: value });
+      setAccessType(accesstype);
+      setAccessTypeDefault(accesstype);
+      setAccessTypekey(prevKey => prevKey + 1);
+    }
+  }, [types, AccessTypeoptions]);
+
+
+  const handleConfigValue = (event) => {
+    const newConfigValue = event.target.value;
+    setConfigValue(newConfigValue)
+
+    setConfigValueErrorMessage('');
+    setConfigValueErrorTheme('formHover');
+
+
+  }
+
+  const handleAccessType = (event) => {
+    setAccessType(event);
+    setAccessTypeErrorMessage('');
+    setAccessTypeErrorTheme('selectForm')
+
+  }
+
+
+  const handlePassConfigValue = (event) => {
+    const newConfigValue = event.target.value;
+    setPassConfigValue(newConfigValue)
+
+    setPassConfigValueErrorMessage('');
+    setPassConfigValueErrorTheme('formHover');
+
+
+  }
+
+
+
+  const handleEnableRadioConfigvalue = (value,isChecked) => {
+ 
+     // setConfigRadiovalue(index)
+      //setConfigRadiovaluedefault(isChecked);
+    
+  }
+
+  const handleDisbaleRadioConfigvalue = (value,isChecked) => {
+ 
+     // setConfigRadiovalue(index)
+      //setConfigRadiovaluedefault(isChecked);
+    
+  }
+
+
+
+  const handleConfigValueMultiSelect = (selectedValues) => {
+
+    // Match selected values with label-value pairs from ConfigListDataList
+    const selectedOptions = selectedValues.map(val =>
+      ConfigListDataList.find(item => item.value === val)
+    ) // removes undefined values if any value not found
+
+    setConfigValueMultiSelect(selectedOptions);
+    setConfigValueMultiSelectErrorMessage('');
+    setConfigValueMultiSelectErrorTheme('selectForm');
+  };
+
+
+  const handleConfigValueSingleSelect = (newConfigValueSingleSelect) => {
+    setConfigValueSingleSelect(newConfigValueSingleSelect);
+    setConfigValueSingleSelectErrorMessage('');
+    setConfigValueSingleSelectErrorTheme('selectForm');
+  };
+
+
+  const handleConfigValueTextArea = (event) => {
+    const newConfigValueTextArea = event.target.value;
+    setConfigValueTextArea(newConfigValueTextArea)
+    setConfigValueTextAreaErrorMessage('');
+    setConfigValueTextAreaErrorTheme('formHover');
+
+
+  }
+
+
+  const handleChangeComment = (event) => {
+    const newChangeComment = event.target.value;
+    setChangeComment(newChangeComment)
+
+
+    if (newChangeComment === '') {
+      setChangeCommentErrorMessage(t("modules.Generic.errorMsg.mandatory"));
+      setChangeCommentErrorTheme('formError');
+      return;
+    }
+
+    const ChangeCommentValidationResult = allcharactersvalidation(newChangeComment, 5, 250, 'Change Comment', t)
+
+    if (ChangeCommentValidationResult !== null) {
+      setChangeCommentErrorMessage(ChangeCommentValidationResult);
+      setChangeCommentErrorTheme('formError');
+      return;
+    }
+    else {
+      setChangeCommentErrorMessage('');
+      setChangeCommentErrorTheme('formHover');
+    }
+
+  }
+
+
+
+
+
+
+
+
+
+  const handleResetModify = (types) => {
+
+    setConfigValue(types.configValue);
+    setConfigValueErrorMessage('');
+    setConfigValueErrorTheme('form');
+
+    setPassConfigValue(types.configValue);
+    setPassConfigValueErrorMessage('');
+    setPassConfigValueErrorTheme('form')
+
+    setAccessType(AccessTypeDefault);
+    setAccessTypeErrorMessage('');
+    setAccessTypeErrorTheme('selectForm')
+    setAccessTypekey(prevKey => prevKey + 1);
+
+    setConfigValueSingleSelect(DefaultConfigValueSingleSelect);
+    setConfigValueSingleSelectErrorMessage('');
+    setConfigValueSingleSelectErrorTheme('selectForm');
+    setConfigValueSingleSelectkey(prevKey => prevKey + 1);
+
+
+    setConfigValueMultiSelect(DefaultConfigValueMultiSelect);
+    setConfigValueMultiSelectErrorMessage('');
+    setConfigValueMultiSelectErrorTheme('selectForm');
+    setConfigValueMultiSelectErrorTheme(prevKey => prevKey + 1);
+
+    setConfigValueTextArea(types.configValue);
+    setConfigValueTextAreaErrorMessage('');
+    setConfigValueTextAreaErrorTheme('form');
+
+
+
+    setChangeComment('');
+    setChangeCommentErrorMessage('');
+    setChangeCommentErrorTheme('form');
+
+
+  };
+
+
+  const confirmProp = {
+    "data-dismiss": "modal",
+  };
+
+  const handleClear = () => {
+    setShowAddDiv(LoadAddPage);
+    setshowEditDiv(LoadSearchPage);
+
+  }
+
+
+  const fetchData = async () => {
+    try {
+
+      const encryptedData = await encryptPayload({ configKey, sysVersionId }, tssguiConf.encryptionKey);
+      const response = await fetch(`${Url}/getConfigkeyData?key=${encodeURIComponent(encryptedData.encryptedKey)}&data=${encodeURIComponent(encryptedData.encryptedPayload)}&iv=${encodeURIComponent(encryptedData.iv)}`, { headers: { 'tssgui-tenant-code': localStorage.getItem('tenantCode') } });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      Log('Configuration', 'INFO', 'Data fetched successfully: ' + JSON.stringify(data));
+      //   const updatedData = data.map(item => ({
+      //     ...item,
+      //     defaultValueLabel:getLabelFromvalue(item.CONFIG_DEFAULT,ConfigListDataList) || "Unknown",
+
+      // }));
+      //setConfigKeyDataList(data);
+      setConfigKeyDataList(Array.isArray(data) ? data : [data]);
+
+    } catch (error) {
+      Log('Application', 'ERROR', 'Error fetching data: ' + error);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchData();
+
+  }, [clientName, sessionID, serverIP, clientIP, configKey]);
+
+
+
+  const fetchConfigListData = async () => {
+    try {
+
+      const encryptedData = await encryptPayload({ configKey, sysVersionId }, tssguiConf.encryptionKey);
+      const response = await fetch(`${Url}/getConfigListData?key=${encodeURIComponent(encryptedData.encryptedKey)}&data=${encodeURIComponent(encryptedData.encryptedPayload)}&iv=${encodeURIComponent(encryptedData.iv)}`, { headers: { 'tssgui-tenant-code': localStorage.getItem('tenantCode') } });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      Log('Configuration', 'INFO', 'Data fetched successfully: ' + JSON.stringify(data));
+	const dataArray = Array.isArray(data) ? data : [data];
+      const levelOptions = dataArray.map((item) => ({
+        label: item.displayText,
+        value: item.configValue
+      }));
+
+
+      setConfigListDataList(levelOptions);
+
+
+
+
+    } catch (error) {
+      Log('Application', 'ERROR', 'Error fetching data: ' + error);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchConfigListData();
+
+  }, [clientName, sessionID, serverIP, clientIP, configKey]);
+
+
+  const validateModify = () => {
+    let isValid = true;
+
+    const fieldType = types.fieldType;
+    const configType = types.configType;
+    const regExpStr = types.validateExpression;
+    const minval = types.minValue;
+    const maxval = types.maxValue;
+    const value = fieldType === "T" ? ConfigValue : ConfigValueTextArea;
+    const confDisp = "Config Value";
+
+    // === TEXT or TEXTAREA FIELDS ===
+    if (fieldType === "T" || fieldType === "A") {
+      if(configType === "RX"){
+      if (regExpStr && regExpStr !== "-") {
+        try {
+          const RE1 = new RegExp(regExpStr);
+          if (!RE1.test(value)) {
+            const errorText = t("Configuration.ErrMsg.InavlidParam");
+            if (fieldType === "T") {
+              setConfigValueErrorMessage(errorText);
+              setConfigValueErrorTheme("formError");
+            } else {
+              setConfigValueTextAreaErrorMessage(errorText);
+              setConfigValueTextAreaErrorTheme("formError");
+            }
+            isValid = false;
+          }
+        } catch (e) {
+          console.error("Invalid regular expression:", regExpStr);
+        }
+      }
+      } else {
+        let errorText = null;
+
+        if (configType === "N") {
+          errorText = numericValueValidationVal(value, minval, maxval, confDisp, t);
+        } else if (configType === "I") {
+          errorText = validateIPAddr(value, confDisp, minval, maxval, t);
+        } else if (configType === "A") {
+          errorText = alphaValidation(value, minval, maxval, confDisp, t);
+        } else if (configType === "C") {
+          errorText = alphaNumericValidation(value, minval, maxval, confDisp, t);
+        } else if (configType === "H") {
+          errorText = hexadecimalValidation(value, minval, maxval, confDisp, t);
+        } else if (configType === "S") {
+          errorText = checkNullAndLength(value, minval, maxval, confDisp, t);
+        } else if (configType === "E") {
+          errorText = emailIdValidation(value, minval, maxval, confDisp, t);
+        } else {
+          if (value.length < parseInt(minval) || value.length > parseInt(maxval)) {
+            errorText = `Please enter a value of length between ${minval} and ${maxval}`;
+          }
+        }
+
+        if (errorText) {
+          if (fieldType === "T") {
+            setConfigValueErrorMessage(errorText);
+            setConfigValueErrorTheme("formError");
+          } else {
+            setConfigValueTextAreaErrorMessage(errorText);
+            setConfigValueTextAreaErrorTheme("formError");
+          }
+          isValid = false;
+        }
+      }
+    }
+
+    // === SINGLE SELECT ===
+    if (fieldType === "L") {
+      if (!ConfigValueSingleSelect || ConfigValueSingleSelect.length === 0) {
+        setConfigValueSingleSelectErrorMessage(t("Configuration.ErrMsg.optionSelect"));
+        setConfigValueSingleSelectErrorTheme("selectFormError");
+        isValid = false;
+      }
+    }
+
+    // === MULTI SELECT ===
+    if (fieldType === "M") {
+      if (!ConfigValueMultiSelect || ConfigValueMultiSelect.length === 0) {
+        setConfigValueMultiSelectErrorMessage(t("Configuration.ErrMsg.optionSelect"));
+        setConfigValueMultiSelectErrorTheme("selectFormError");
+        isValid = false;
+      }
+    }
+
+    // === CHANGE COMMENT ===
+    if (ChangeComment === '') {
+      setChangeCommentErrorMessage(t("modules.Generic.errorMsg.mandatory"));
+      setChangeCommentErrorTheme('formError');
+      isValid = false;
+    } else {
+      const changeCommentError = alphaNumericWithAllSpecial(ChangeComment, 5, 255, 'ChangeComment', t);
+      if (changeCommentError !== null) {
+        setChangeCommentErrorMessage(changeCommentError);
+        setChangeCommentErrorTheme('formError');
+        isValid = false;
+      }
+    }
+
+    return isValid;
+  };
+
+
+  const handleModify = async () => {
+    const isValid = validateModify();
+
+    if (isValid) {
+      const isConfirmed = await confirmAction(t("modules.Generic.cfrmMsg.modify"));
+
+
+      const FinalconfigKey = types.configKey;
+      const FinalsysVersionId = sysVersionId;
+      let sysConfigVal = '';
+
+      const finalAccesslevel = AccessType.value;
+
+
+      if (types.fieldType === 'T') {
+        sysConfigVal = ConfigValue;
+      } else if (types.fieldType === 'A') {
+        sysConfigVal = ConfigValueTextArea;
+      } else if (types.fieldType === 'L') {
+        sysConfigVal = ConfigValueSingleSelect?.value || '';
+      } else if (types.fieldType === 'M') {
+        sysConfigVal = ConfigValueMultiSelect.map(item => item.value).join(',');
+      } else if (types.fieldType === 'R') {
+        sysConfigVal = ConfigRadiovalue;
+      }
+
+
+      // Utility function: escape JavaScript characters
+      const escapeJavaScript = (str) => {
+        return str
+          .replace(/\\/g, '\\\\')     // backslashes
+          .replace(/'/g, "\\'")       // single quotes
+          .replace(/"/g, '\\"')       // double quotes
+          .replace(/\//g, '\\/')      // forward slashes
+          .replace(/\n/g, '\\n')      // newlines
+          .replace(/\r/g, '\\r')      // carriage returns
+          .replace(/\t/g, '\\t');     // tabs
+      };
+
+      // Build and escape configOldVal
+      let configOldVal = `Config Key: ${types.configKey}, System Parameter: ${types.configValue}, Comment: ${types.comment || "-"},AccessLevel:${types.accessLevel}`;
+
+      // Replace double quotes with &quot; for HTML safety
+      if (configOldVal.includes('"')) {
+        configOldVal = configOldVal.replace(/"/g, "&quot;");
+      }
+
+      // Replace single quotes with escaped single quote
+      if (configOldVal.includes("'")) {
+        configOldVal = configOldVal.replace(/'/g, "\\'");
+      }
+
+      // Final escape for JavaScript
+      configOldVal = escapeJavaScript(configOldVal);
+
+
+      const configNewVal = `ConfigKey: ${FinalconfigKey}, System Parameter: ${sysConfigVal}, Comment : ${ChangeComment},AccessLevel:${finalAccesslevel}`;
+
+      if (isConfirmed) {
+        setConfirmmodal(true);
+
+        const requestBody = {
+          configKey: FinalconfigKey,
+          sysVersionId: FinalsysVersionId,
+          accessType: finalAccesslevel,
+          acntId: parseInt(clientID, 10),
+          configDisplay: types.displayText,
+          liveFlag: types.liveFlag,
+          sysConfigVal: sysConfigVal,
+          changeNote: ChangeComment.trim(),
+          configOldVal: configOldVal,
+          configNewVal: configNewVal,
+          acctName: userName,
+          productId: parseInt(productId, 10),
+          remoteIP: clientIP,
+          serverIP: serverIP,
+          nodePosData: [],
+          configNodeValue: []
+        };
+
+        Log('Configuration Modify', 'INFO', 'Request body : ' + JSON.stringify(requestBody));
+
+        try {
+          const encryptedData = await encryptPayload(requestBody, tssguiConf.encryptionKey);
+          const response = await fetch(`${Url}/saveNodeWiseConfVal`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'tssgui-tenant-code': localStorage.getItem('tenantCode') },
+            body: JSON.stringify({ key: encryptedData.encryptedKey, data: encryptedData.encryptedPayload, iv: encryptedData.iv }),
+          });
+
+
+          if (response.ok) {
+            const resultString = await response.text(); // plain string like "Configuration saved Successfully .|$|alert-success"
+
+            if (resultString.includes("Configuration saved Successfully")) {
+              showToast('success', "Modification Successful");
+              setTempVariable(prev => prev + 1);
+              closeAddPage();
+            } else {
+              showToast('error', resultString);
+              Log('Configuration Modify', 'ERROR', 'Failed to modify Configuration : ' + resultString);
+              setTempVariable(prev => prev + 1);
+              closeAddPage();
+            }
+
+          } else {
+            showToast('error', 'Failed to communicate with the server');
+            Log('Configuration Modify', 'ERROR', 'Failed to communicate with the server');
+          }
+
+        } catch (error) {
+          showToast('error', 'Unexpected error occurred');
+          Log('Configuration Modify', 'ERROR', 'Exception thrown: ' + error.message);
+        }
+
+      } else {
+        Log('Configuration Modify', 'ERROR', 'Error in Validations : Validation failed');
+      }
+
+    }
+  }
+  const AddProp = showAlert ?
+    {
+      "data-target": "#tssAlertModal",
+      "data-toggle": "modal"
+    } : {};
+
+  const ModProp = showAlert ?
+    {
+      "data-target": "#tssAlertModal",
+      "data-toggle": "modal"
+    } : {};
+
+
+  return (
+    <div>
+      <section className="content" >
+        <div className="card" >
+          <div className="card-body align-items-center py-8">
+
+            {showEditDiv && (
+              <>
+
+
+
+
+                {ConfigKeyDataList.length > 0 &&
+                  ConfigKeyDataList.map((item, index) => (
+                    <React.Fragment key={index}>
+                      {/* Gray Box - Display Info */}
+
+                      <fieldset style={{ border: "2px solid purple", borderRadius: "10px", zIndex: 1, position: 'relative', overflow: 'visible', height: "auto", padding: '16px', marginBottom: '20px' }}>
+                        <legend className="w-auto responseTagLegend"></legend>
+
+
+                        {/* Config Key */}
+                        <div className="row mb-2">
+                          <div className="col-md-2"><label>{t('Configuration.EditPage.fields.ConfigKey')}</label></div>
+                          <div className="col-md-10">: {item.displayText} [{item.configKey}]
+                          </div>
+                        </div>
+
+                          <div className="row mb-2">
+                          <div className="col-md-2"><label>{t('Config Value')}</label></div>
+                          <div className="col-md-10">: {item.configValue}
+                          </div>
+                        </div>
+
+                        {/* Default Value */}
+                        <div className="row mb-2">
+                          <div className="col-md-2"><label>{t('Configuration.EditPage.fields.DefaultValue')}</label></div>
+                          <div className="col-md-10">: {item.defaultValue}</div>
+                          {/* <div className="col-md-4">:{getLabelFromvalue(item.CONFIG_DEFAULT, ConfigListDataList)}</div> */}
+                        </div>
+
+                        {/* Min / Max */}
+                        {(item.fieldType === "T" || item.fieldType === "A") && (
+                          <div className="row mb-2">
+                            <div className="col-md-2">
+                              <label>{item.configType === "N" ? t('Configuration.EditPage.fields.MinValue') : t('Configuration.EditPage.fields.MinLength')}</label>
+                            </div>
+                            <div className="col-md-4">: {item.minValue}</div>
+
+                            <div className="col-md-2">
+                              <label>{item.configType === "N" ? t('Configuration.EditPage.fields.MaxValue') : t('Configuration.EditPage.fields.MaxLength')}</label>
+                            </div>
+                            <div className="col-md-4">: {item.maxValue}</div>
+                          </div>
+                        )}
+
+                        {/* Last Modified */}
+                        <div className="row mb-2">
+                         
+                         <div className="col-md-2"><label>{t('Configuration.EditPage.fields.Reloadable')}</label></div>
+                          <div className="col-md-4">: {item.reloadable === "1" ? "Yes" : "No"}</div>
+                           <div className="col-md-2"><label>{t('Last Modified')}</label></div>
+                          <div className="col-md-4">: {item.ACCT_NAME} [{item.MODIFIED_TIMESTAMP}]</div>
+
+
+                        </div>
+
+
+ {item.comment && item.comment.trim() !== "" && item.comment !== "-" && (
+                        <div className="row mb-2">
+                          <div className="col-md-12">
+                            <TssTextArea
+                              label={t('Comment')}
+                              key={Commentkey}
+                              disabled={true}
+                              properties={{
+                                value: item.comment,
+                              }}
+
+                            />
+                          </div>
+                        </div>
+ )}
+                      </fieldset>
+
+                      {/* Config Input - OUTSIDE gray box */}
+                      <div className="row">
+
+                        <div align="left" className="form-group col-md-9">
+                          {item.fieldType === "T" && (
+
+                            <TssTextBox
+                              label={t('Configuration.EditPage.fields.ConfigValue')}
+                              key={index + "_txt"}
+                              inputInfo={item.helpText}
+                              placeholderName={t('Configuration.EditPage.Placeholder.ConfigValue')}
+                              disabled={types.accessLevel === 1 || types.accessLevel === "1"}
+                              properties={{
+                                onChange: handleConfigValue,
+                                value: ConfigValue,
+                                maxLength: "250",
+                              }}
+                              validation={ConfigValueErrorTheme}
+                              tooltipMessage={ConfigValueErrorMessage}
+                            />
+                          )}
+
+                          {item.fieldType === "P" && (
+                            <TssTextBox
+                              label={t('Configuration.EditPage.fields.ConfigValue')}
+                              key={index + "_txt"}
+                              inputInfo={item.helpText}
+                              placeholderName={t('Configuration.EditPage.Placeholder.ConfigValue')}
+                              disabled={types.accessLevel === 1 || types.accessLevel === "1"}
+                              properties={{
+                                onChange: handlePassConfigValue,
+                                value: PassConfigValue,
+                                maxLength: "250",
+                                type: "password"
+                              }}
+                              validation={ConfigValueErrorTheme}
+                              tooltipMessage={ConfigValueErrorMessage}
+                            />
+                          )}
+
+                          {item.fieldType === "R" && (
+                            <>
+                             <TssRadioButton columns={1}
+                              options={RadioConfigEnable}
+                              onChange={handleEnableRadioConfigvalue}
+                              uniqueId="enable"
+                              key={ConfigEnableRadiovaluekey}
+                              disabled={types.accessLevel === 1 || types.accessLevel === "1"}
+                            />
+                             <TssRadioButton columns={1}
+                              options={RadioConfigDisable}
+                              onChange={handleDisbaleRadioConfigvalue}
+                              uniqueId="disable"
+                              key={ConfigDisableRadiovaluekey}
+                              disabled={types.accessLevel === 1 || types.accessLevel === "1"}
+                            />
+                            </>
+                           
+                            
+                          )}
+                          {item.fieldType === "M" && (
+                            <TssMultiSelectBox
+                              key={index + "_multi"}
+                              label={t('Configuration.EditPage.fields.ConfigValue')}
+                              placeholder={t('Configuration.EditPage.Placeholder.ConfiggValueMultiSelect')}
+                              options={ConfigListDataList}
+                              onSelect={handleConfigValueMultiSelect}
+                              defaultValue={ConfigValueMultiSelect}
+                              isSeachable={true}
+                              selectAllOption={true}
+                              disabled={types.accessLevel === 1 || types.accessLevel === "1"}
+                              validationTheme={ConfigValueMultiSelectErrorTheme}
+                              tooltipMessage={ConfigValueMultiSelectErrorMessage}
+                            />
+                          )}
+
+                          {item.fieldType === "L" && (
+                            <TssSelectBoxSearch
+                              label={t('Configuration.EditPage.fields.ConfigValue')}
+                              key={index + "_select"}
+                              options={ConfigListDataList}
+                              defaultValue={ConfigValueSingleSelect}
+                              onSelect={handleConfigValueSingleSelect}
+                              disabled={types.accessLevel === 1 || types.accessLevel === "1"}
+                              validationTheme={ConfigValueSingleSelectErrorTheme}
+                              tooltipMessage={ConfigValueSingleSelectErrorMessage}
+                            />
+                          )}
+
+                          {item.fieldType === "A" && (
+                            <TssTextArea
+                              key={index + "_textarea"}
+                              rows={2}
+                              mandatory={true}
+                              label={t('Configuration.EditPage.Placeholder.ConfigValue')}
+                              inputInfo={item.helpText}
+                              disabled={types.accessLevel === 1 || types.accessLevel === "1"}
+                              properties={{
+                                onChange: handleConfigValueTextArea,
+                                maxLength: 250,
+                                value: ConfigValueTextArea,
+                              }}
+                              validation={ConfigValueTextAreaErrorTheme}
+                              tooltipMessage={ConfigValueTextAreaErrorMessage}
+                            />
+                          )}
+                        </div>
+
+                        <div align="left" className="form-group col-md-3">
+                          <TssSelectBoxSearch
+                            label={t('Access Type')}
+                            key={AccessTypekey}
+                            disabled={types.accessLevel === 1 || types.accessLevel === "1"}
+                            options={AccessTypeoptions}
+                            defaultValue={AccessType}
+                            onSelect={handleAccessType}
+                            validationTheme={AccessTypeErrorTheme}
+                            tooltipMessage={AccessTypeErrorMessage}
+                          />
+
+                        </div>
+
+                      </div>
+                    </React.Fragment>
+                  ))}
+
+    {types.accessLevel != "1" && types.accessLevel !=1 && (
+                <div className='row'>
+                  <div align="left" className="form-group col-md-12">
+                    <TssTextArea
+                      label={t("Configuration.EditPage.fields.ChangeComment")}
+                      mandatory={true} key={ChangeCommentkey}
+                      validation={ChangeCommentErrorTheme}
+                      inputInfo={t('Enter Comment (Max Length:255)')}
+                      rows={2}
+                      tooltipMessage={ChangeCommentErrorMessage}
+                      properties={{ onChange: handleChangeComment, "value": ChangeComment, maxLength: "255" }} />
+                
+                  </div>
+                </div>
+    )}
+
+
+              </>
+            )}
+
+
+            <div className='tss-pull-right d-flex justify-content-between' style={{ marginTop: '18px' }}>
+
+
+              {showEditDiv && types.accessLevel != "1" && types.accessLevel !=1 &&(
+                <>
+                  <TssButton label={t("modules.Generic.buttons.label.modify")} btnProps={ModProp}
+                    onClick={handleModify}
+                    isDisabled={!modPermission} />
+                  <TssButton label={t("modules.Generic.buttons.label.reset")} onClick={() => { handleResetModify(types); }} />
+                </>
+              )}
+              <TssButton label={t("modules.Generic.buttons.label.close")} onClick={() => { closeAddPage(); handleClear(); }} />
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+
+
+  )
+}
+
+export default ConfigurationAdd;

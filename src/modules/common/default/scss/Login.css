@@ -1,0 +1,120 @@
+
+.login-screen-bg {
+    background-image: url('/images/LoginBackground.svg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative; /* Changed from fixed */
+    min-height: 100vh; /* Allows growth */
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+
+
+.login-screen-image {
+    width:100%;
+    max-height: 500px;
+    object-fit: contain;
+}
+
+/* 25 YEAR Of Excellence */
+.logo-text {
+    position: absolute;
+    font-family: 'Gilroy' !important;
+    font-size: 10px;
+    line-height: 12px;
+    letter-spacing: 0.26em;
+    color: #8C287B;
+}
+
+/* Login Screen Footer */
+.login-screen-footer {
+    font-family: 'Gilroy' !important;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 19px;
+    letter-spacing: 0.07em;
+    color: #8D9099;
+    text-align: center;
+    position: relative;
+}
+
+/* Login Card */
+.login-card {
+    max-width: 370px;
+    height: auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.19);
+    box-shadow: 0px 9px 18.4px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(12.5px);
+    border-radius: 40px;
+    z-index: 100;
+
+}
+
+/* Adjust input fields */
+.user-id, .user-id2, .user-password {
+    padding: 10px;
+}
+
+/* Make "Remember Me" and Forgot Password Stack */
+.remember-me {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 12px;
+}
+
+.sign-in-button {
+    width: 100%;
+    height: 40px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #FFFFFF;
+    border-radius: 20px;
+    margin-top: 10px;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .d-flex.vh-100 {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .w-50 {
+        width: 100%;
+    }
+
+    .login-card {
+        max-width: 320px;
+    }
+
+    .login-screen-footer {
+        font-size: 12px;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        width: 95%;
+        padding: 15px;
+    }
+
+    .sign-in-button {
+        font-size: 14px;
+    }
+
+    .login-screen-footer {
+        font-size: 10px;
+    }
+}
+

@@ -1,0 +1,21 @@
+{
+  "appenders": {
+    "file": {
+      "type": "file",
+      "filename": "/opt/tssgui/var/guilog/Tssgui.log",
+      "pattern": "yyyy-MM-dd.log.gz",
+      "rollingPolicy": {
+        "type": "time",
+        "interval": 1,
+        "modulate": true
+      },
+      "strategy": {
+        "type": "default"
+      }
+    }
+  },
+  "categories": {
+    "default": { "appenders": ["file"], "level": "info" }
+  }
+}
+

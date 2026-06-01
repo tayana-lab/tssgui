@@ -1,0 +1,166 @@
+import { Dropdown } from '@profabric/react-components';
+import { useEffect, useRef, useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import styled from 'styled-components';
+import { useDispatch, useSelector } from 'react-redux';
+//import { MENU } from '@app/modules/welcome/HomePage_leftbar';
+
+export const StyledDropdown = styled(Dropdown)`
+  border: none;
+  width: 100%;
+  display: flex;
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+  --pf-dropdown-menu-min-width: 14.625rem;
+  --pf-dropdown-border: none;
+  --pf-dropdown-menu-margin-top: 0px;
+
+  .menu {
+    background-color: #454d55;
+  }
+
+  .dropdown-item {
+    padding: 0.5rem 1rem;
+  }
+
+  .nothing-found {
+    color: #c2c7d0;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .list-group {
+    .list-group-item {
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+    }
+
+    .search-path {
+      font-size: 80%;
+      color: #adb5bd;
+    }
+  }
+`;
+
+export const SidebarSearch = ({ menu }) => {
+  const [searchText, setSearchText] = useState('');
+  const [foundMenuItems, setFoundMenuItems] = useState<any[]>([]);
+  const dropdown = useRef(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+const darkMode = useSelector((state) => state.ui.darkMode);
+  useEffect(() => {
+    setFoundMenuItems([]);
+    if (searchText && Array.isArray(menu)) {
+      setFoundMenuItems(findMenuItems(menu));
+    } else {
+      setSearchText('');
+      setFoundMenuItems([]);
+    }
+  }, [searchText]);
+
+  useEffect(() => {
+    if (foundMenuItems && foundMenuItems.length > 0) {
+      setIsDropdownOpen(true);
+    } else {
+      setIsDropdownOpen(false);
+    }
+  }, [foundMenuItems]);
+
+  const handleIconClick = () => {
+    setSearchText('');
+    setIsDropdownOpen(false);
+  };
+
+  const handleMenuItemClick = (menuItem) => {
+    localStorage.setItem("moduleVersionType", menuItem.versionType ? menuItem.versionType : '0');
+    localStorage.setItem("modulePath", menuItem.linkPath ? menuItem.linkPath : '');
+    localStorage.setItem("moduleHeading", menuItem.heading ? menuItem.heading : '');
+    localStorage.setItem("manual", menuItem.helpText ? menuItem.helpText : '');
+    setSearchText('');
+    setIsDropdownOpen(false);
+  };
+
+  const findMenuItems = (menu: any, results: any = []): any[] => {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const menuItem of menu) {
+
+      if (menuItem.alias.toLowerCase().includes(searchText.toLowerCase()) && menuItem.modulePage) {
+        results.push(menuItem);
+      }
+      if (menuItem.submodules && menuItem.submodules.length > 0 ) {
+       findMenuItems(menuItem.submodules, results);
+      }
+
+    }
+    return results;
+  };
+
+  const boldString = (str: string, substr: string) => {
+    return str.replaceAll(
+      substr,
+      `<strong >${substr}</strong>`
+    );
+  };
+
+  return (
+    <StyledDropdown
+      ref={dropdown}
+      isOpen={isDropdownOpen}
+      hideArrow
+      openOnButtonClick={false}
+    >
+      <div slot="head">
+        <div className="input-group">
+          <input
+            className="form-control form-control-sidebar"
+            type="text"
+            placeholder="Search"
+            aria-label="Search"
+            value={searchText}
+            onInput={(e) => setSearchText((e.target as any).value)}
+          />
+          <div className="input-group-append">
+            <button
+              type="button"
+              className="btn btn-sidebar"
+              onClick={() => handleIconClick()}
+            >
+              <i
+                className={`fas ${searchText.length === 0 && 'fa-search'} ${
+                  searchText.length > 0 && 'fa-times'
+                } fa-fw`}
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="menu" slot="body">
+        {foundMenuItems && foundMenuItems.length === 0 && (
+          <div className="nothing-found">No Element found</div>
+        )}
+        {foundMenuItems.length > 0 && (
+          <div className="list-group tss-menu-item-search-list">
+            {foundMenuItems &&
+              foundMenuItems.map((menuItem: any) => (
+                <NavLink
+                  key={menuItem.alias + menuItem.modulePage}
+                  className='list-group-item'
+                  to={menuItem.modulePage}
+                  onClick={() => handleMenuItemClick(menuItem)}
+                >
+                  <div
+                    className="search-title"
+                    // eslint-disable-next-line react/no-danger
+                    dangerouslySetInnerHTML={{
+                      __html: boldString(menuItem.alias, searchText),
+                    }}
+                  />
+                  <div className='search-path tss-menu-search-item' >{menuItem.alias}</div>
+                </NavLink>
+              ))}
+          </div>
+        )}
+      </div>
+    </StyledDropdown>
+  );
+};

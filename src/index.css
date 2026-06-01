@@ -1,0 +1,13 @@
+
+
+@font-face {
+  font-family: 'Gilroy-Bold';
+  src: url('@modules/common/default/fonts/Gilroy-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Gilroy';
+  src: url('@modules/common/default/fonts/Gilroy-Medium.ttf') format('truetype');
+}
+
+

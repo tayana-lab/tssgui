@@ -1,0 +1,364 @@
+
+$tss-primary-color:#5c3da4;
+.p-paginator {
+  display: flex;
+  justify-content: flex-end;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.p-inputtext {
+   width:100%;
+   border-radius: 6px !important;
+}
+
+.tssDT-custom-button{
+ text-align: center; 
+}
+
+.tssDT-download-options{
+	
+ list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.tssDT-download-options li {
+  margin-right: 10px; /* Adjust the spacing between items */
+}
+
+/* Additional styles for the tooltip */
+.p-tooltip {
+  max-width: 200px; /* Adjust the maximum width of the tooltip */
+}
+
+.p-tooltip .p-tooltip-content {
+ background: transparent !important;
+}
+
+.p-tooltip .p-tooltip-arrow {
+  display: none; /* Hide the tooltip arrow */
+}
+
+.p-datatable.p-datatable-striped .p-datatable-tbody > tr.p-row-odd
+{
+	background :#F5EEF8 
+}
+
+.p-datatable-header
+{
+        background : white;
+	padding-top: 0px;
+	border:0px;
+	border-top-right-radius: 10px;
+	border-top-left-radius: 10px;
+}
+
+
+.p-datatable-modulename{
+  color:$tss-primary-color;
+  font-size: large;
+}
+
+// .p-datatable-heading{
+//   color:$tss-primary-color;
+// }
+.p-paginator-bottom
+{
+	border:0px;
+  
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+    background-color: #7e6aab;
+    color:#ffffff;/* Replace with your desired background color */
+    padding: 1px
+    
+}
+.p-column-title{
+  margin-left: 6px;
+  font-weight: normal;
+}
+.p-datatable.p-datatable-striped .p-datatable-tbody > tr:hover {
+    background-color: #E8DAEF;
+}
+
+.list-unstyled.d-flex > li {
+    	margin-right: -8px;
+	margin-left: -8px;
+}
+
+.list-unstyled.d-flex > li > a {
+	background : none;
+}
+
+.p-paginator-current {
+	cursor: default;
+  
+}
+
+.p-datatable .p-sortable-column.p-highlight:not(.p-sortable-disabled):hover .p-sortable-column-icon {
+  color: #ffffff !important;
+}
+
+.p-datatable .p-sortable-column .p-sortable-column-icon {
+  color: #ffffff !important;
+}
+.p-datatable .p-sortable-column .p-filter-column-icon {
+  color: #ffffff !important;
+}
+.p-column-filter-menu-button {
+  color: #ffffff !important;
+}
+.p-column-filter-menu-button:hover {
+  color:$tss-primary-color !important;
+}
+.p-column-filter-menu-button-open {
+  color:$tss-primary-color !important;
+}
+.p-column-filter-menu-button.p-column-filter-menu-button-active, .p-column-filter-menu-button.p-column-filter-menu-button-active:hover {
+  background: #ffffff !important;
+  color: $tss-primary-color !important;
+}
+
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  background: #F5EEF8  !important;
+  border-color: #F5EEF8  !important;
+  color: $tss-primary-color !important;
+}
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight:hover {
+  background: #F5EEF8 !important;
+
+}
+.p-inputtext:enabled:hover {
+  border-color: $tss-primary-color !important;
+}
+
+.p-inputtext:focus {
+  outline: none !important;
+}
+
+
+.p-inputtext:enabled:focus {
+  border-color: $tss-primary-color !important; 
+  color: $tss-primary-color !important; 
+  box-shadow: 0 0 0 0.2rem rgba(254, 212, 255, 0.5) !important; 
+}
+
+.p-multiselect .p-component .p-inputwrapper .p-inputwrapper-filled .p-inputwrapper:hover{
+  border-color: $tss-primary-color !important; 
+  color: $tss-primary-color !important; 
+  box-shadow: 0 0 0 0.2rem rgba(254, 212, 255, 0.5) !important;
+}
+
+.p-multiselect:not(.p-disabled):hover {
+  border-color: $tss-primary-color !important;
+}
+
+.p-multiselect:not(.p-disabled).p-focus {
+  outline: none;
+  outline-offset: 0;
+  box-shadow: 0 0 0 0.2rem rgba(254, 212, 255, 0.5) !important;
+  border-color: $tss-primary-color !important;
+  }
+
+.p-checkbox.p-highlight .p-checkbox-box {
+  border-color: $tss-primary-color !important;
+  background: $tss-primary-color !important;
+}
+.p-checkbox .p-checkbox-box {
+  border: 2px solid $tss-primary-color !important;
+}
+
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item.p-highlight {
+  color: $tss-primary-color !important;
+  background: #F5EEF8 !important;
+}
+.p-multiselect-panel .p-multiselect-items .p-multiselect-item{
+  color: $tss-primary-color !important;
+  background: #fff !important;
+}
+
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight.p-focus {
+  background: #F5EEF8 !important;
+  color:$tss-primary-color !important;
+}
+
+li.p-dropdown-items {
+  padding-left : 0px !important;
+}
+
+
+ul.p-dropdown-items {
+  padding-left : 0px !important;
+}
+
+
+ol.p-dropdown-items {
+  padding-left : 0px !important;
+}
+
+
+
+.p-dropdown:hover {
+  background: #ffffff;
+  border: 1px solid $tss-primary-color !important;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  border-radius: 3px;
+  outline-color: transparent;
+}
+.p-dropdown:focus {
+  background: #ffffff;
+  border: 1px solid $tss-primary-color !important;
+  border-radius: 3px;
+  outline-color: transparent;
+  box-shadow: 0 0 0 0.2rem rgba(254, 212, 255, 0.5) !important;
+}
+
+.p-dropdown:not(.p-disabled):hover {
+  border-color: $tss-primary-color !important;
+}
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item:not(.p-highlight):not(.p-disabled).p-focus {
+  color:$tss-primary-color !important;
+  background:#F5EEF8 !important;
+}
+.p-dropdown-panel .p-dropdown-items .p-highlight {
+  color:#ffffff !important;
+  background: $tss-primary-color !important;
+}
+.p-dropdown:not(.p-disabled).p-focus {
+  outline: 0 none;
+  outline-offset: 0;
+  box-shadow:  0 0 0 0.2rem rgba(254, 212, 255, 0.5) !important;
+  border-color: $tss-primary-color !important;
+}
+
+
+.p-button {
+  color: #ffffff;
+  background: $tss-primary-color !important;
+  border: 1px solid  $tss-primary-color !important;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  box-shadow:  none;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  border-radius: 3px;
+}
+
+.tssDTDownloadBtn{
+  background: none !important;
+  border:none !important;
+  font-size: 1rem;
+  padding : 0;
+}
+
+
+button.p-column-filter-add-button.p-button-text.p-button-sm.p-button.p-component {
+  display: none;
+}
+.p-column-filter-operator-dropdown.p-dropdown.p-component.p-inputwrapper.p-inputwrapper-filled {
+  display: none;
+}
+
+
+select.p-inputtext:enabled option:checked {
+  background-color: $tss-primary-color !important;
+  color:#ffffff !important;
+}
+
+select.p-inputtext:enabled option {
+  color:$tss-primary-color !important;
+}
+
+select.p-inputtext option:focus-visible{
+  background-color: #F5EEF8 !important;
+  color: #000000 !important;
+}
+
+
+
+.p-tieredmenu {
+    display: flex;
+    flex-direction: row;
+    width: auto;
+    z-index:1100 !important;
+}
+
+.p-tieredmenu > ul {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: -3px;
+    margin-top: -4px;
+    margin-left: -28px
+}
+
+.p-tieredmenu > ul > li 
+{
+	    margin: -5px;
+}
+
+.p-tieredmenu > ul > li > .p-menuitem-content
+{
+	    background: none;
+}
+
+.tssDTDownloadBtn:focus,
+.tssDTDownloadBtn:active {
+    outline: none;
+   box-shadow:none; 
+}
+
+.p-inputtext .p-component
+{
+	
+}
+
+.p-column-filter-overlay > .p-column-filter-operator .p-column-filter-add-rule
+{
+display:none !important;
+}
+/* rgb(218, 22, 32); */
+.nav-tabs .nav-link.active.active-tab {
+  border-top: 3px solid rgb(56, 114, 190);
+  border-radius:4px;
+  font-weight: bold;
+  color:rgb(56, 114, 190);
+}
+
+.nav-link {
+  color: rgb(110, 107, 107); 
+  font-weight: bold;
+}
+
+.nav-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding-top: 7px;
+}
+
+.nav-tabs{
+  position: relative;
+}
+
+.gap{
+  margin-left: 10px;
+}
+
+.p-checkbox-input
+{
+	    position: absolute !important;
+}
+
+.p-sortable-column-icon {
+  min-width: 10px;
+}
+
+.p-column-filter-overlay,.p-dropdown-panel {
+  z-index: 1100 !important;
+}
+

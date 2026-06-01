@@ -1,0 +1,1862 @@
+import express from 'express';
+import bodyParser from 'body-parser';
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
+import cors from 'cors';
+import fetch from 'node-fetch';
+import jwt from 'jsonwebtoken';
+import os from 'os';
+import log4js from 'log4js';
+import tssguiConf from './modules/conf/TssGui.json' assert { type: 'json' };
+import Log from './modules/common/default/components/TssGUILog.js'
+import { exec } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname ,join } from 'path';
+import FormData from 'form-data';
+import { chromium } from 'playwright';
+import helmet from 'helmet';
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const parentDir = join(__dirname, '../');
+const app = express();
+const port = tssguiConf.SERVER_JS_API_PORT;
+const serverJsIP = tssguiConf.SERVER_JS_API_IP;
+const agent = new https.Agent({
+  rejectUnauthorized: false // Ignore self-signed certificate errors
+});
+
+// Enable bodyParser middleware to parse JSON requests
+app.use(bodyParser.text({ type: 'text/plain', limit: '50mb' }));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(cors({
+  origin:'*',
+  methods: ['POST', 'GET','PUT','DELETE','PATCH'],
+  allowedHeaders: ['Content-Type', 'tssgui-tenant-code'],
+}));
+app.use(helmet());
+app.use((req, res, next) => {
+  // Decrypt body (POST/PATCH/PUT/DELETE)
+  if (req.body && req.body.key && req.body.data && req.body.iv) {
+    try {
+      req.body = decryptPayload(req.body.key, req.body.data, req.body.iv);
+    } catch (err) {
+      logger.error('server.js ::: decryptMiddleware ::: Failed to decrypt request body ::: ' + err.message);
+      return res.status(400).json({ error: 'Invalid encrypted payload' });
+    }
+  }
+  // Decrypt query params (GET)
+  if (req.query && req.query.key && req.query.data && req.query.iv) {
+    try {
+      const decrypted = decryptPayload(req.query.key, req.query.data, req.query.iv);
+      req.query = decrypted;
+    } catch (err) {
+      logger.error('server.js ::: decryptMiddleware ::: Failed to decrypt request query params ::: ' + err.message);
+      return res.status(400).json({ error: 'Invalid encrypted query params' });
+    }
+  }
+  next();
+});
+/////////////////////////////////////////////////////////
+const url = tssguiConf.TSS_SERVER_API_URI;
+///////////// API authentication - TSSGUI ///////////////
+const username = tssguiConf.TSS_SERVER_API_USERNAME;
+const Password = tssguiConf.TSS_SERVER_API_PASSWORD;
+const base64Credentials = Buffer.from(`${username}:${Password}`).toString('base64');
+const privateKey = process.env.PRIVATE_ENCRYPTION_KEY?.replace(/\\n/g, "\n");
+
+
+
+////////////////////////////TSSGUI LOGS/////////////////////////////
+log4js.configure('/opt/tssgui/tssgui/log4j.json');
+const logger = log4js.getLogger();
+
+
+
+function decryptPayload(encryptedKey, encryptedData, ivBase64) {
+        try {
+                const decryptedAESKey = crypto.privateDecrypt(
+                        {
+                                key: privateKey,
+                                padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+                                oaepHash: 'sha256',
+                        },
+                        Buffer.from(encryptedKey, 'base64')
+                );
+
+                const iv = Buffer.from(ivBase64, 'base64');
+
+                const decipher = crypto.createDecipheriv('aes-128-cbc', decryptedAESKey, iv);
+                let decrypted = decipher.update(encryptedData, 'base64', 'utf8');
+                decrypted += decipher.final('utf8');
+
+                return JSON.parse(decrypted);
+        } catch (err) {
+                console.error('❌ Decryption failed:', err.message);
+                throw new Error('Failed to decrypt payload');
+        }
+}
+
+
+app.post('/tssgui/logs', (req, res) => {
+  try {
+    const rawData = req.body;
+
+    const parts = typeof rawData === 'string' ? rawData.split('|') : [];
+    const module = parts[0]?.trim() || "UnknownModule";
+    const logType = parts[1]?.trim()?.toLowerCase() || "info";
+    const logMessage = parts.slice(2).join('|').trim();
+
+    const logger = log4js.getLogger(module);
+
+    if (typeof logger[logType] === 'function') {
+      logger[logType](logMessage);
+    } else {
+      logger.info(logMessage);
+    }
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Logging error:", err);
+    res.sendStatus(500);
+  }
+});
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////// TSSGUI API //////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+app.get('/download', (req, res) => {
+  const { filePath, fileName } = req.query;
+  logger.info("server.js ::: Download ::: Recieved Request ::: filePath ::: "+filePath+" ::: fileName ::: "+fileName);
+  const file = `${parentDir}/${filePath}/${fileName}`;
+
+  res.download(file, fileName, (err) => {
+    if (err) {
+      logger.error("server.js ::: Download ::: Error downloading file ::: "+err);
+      res.status(404).send('File not found');
+    } else {
+      logger.info("server.js ::: Download ::: File downloaded successfully ::: ");
+    }
+  });
+});
+
+//////////////////////////////////////////////////////////////////////////
+//                         COMMON API
+//////////////////////////////////////////////////////////////////////////
+//validateLogin
+app.post('/validateLogin', async (req, res) => {
+ logger.info("server.js ::: Login ::: validate login ::: Recieved Request ::: "+JSON.stringify(req.body));
+   //logger.info("URL->",`${url}/validateLogin`);
+    try {
+    const response = await fetch(`${url}/validateLogin`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': req.query.tenantCode
+      },
+      body: JSON.stringify(req.body),
+      method: 'POST'
+    });
+
+    const data = await response.json();
+    logger.info("server.js ::: Login ::: validate login ::: Response ::: "+JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: Login ::: validate login ::: Error Connecting to external API ::: "+error);
+    if (error.name === 'FetchError' || error.code === 'ECONNREFUSED') {
+     logger.error("server.js ::: Login ::: validate login ::: Network error or external API not reachable ::: "+error.message);
+      return res.status(502).json({ error: 'External API not reachable.' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//ChangePassword
+app.post('/changePassword', async (req, res) => {
+  logger.info("server.js ::: Login ::: changePassword ::: Recieved Request ::: "+JSON.stringify(req.body) + " tenantCode:" + req.query.tenantCode);
+   //logger.info("URL->",`${url}/changeProfilePassword`);
+    try {
+    const response = await fetch(`${url}/changeProfilePassword`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+         'tssgui-tenant-id': req.query.tenantCode
+      },
+      body: JSON.stringify(req.body),
+      method: 'PATCH'
+    });
+
+    const data = await response.json();
+     logger.info("server.js ::: Login ::: changePassword ::: Response ::: "+JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: Login ::: changePassword ::: Error Connecting to external API ::: "+error);
+    if (error.name === 'FetchError' || error.code === 'ECONNREFUSED') {
+     logger.error("server.js ::: Login ::: validate login ::: Network error or external API not reachable ::: "+error.message);
+      return res.status(502).json({ error: 'External API not reachable.' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//////////////////////////////////////////////////////////////////////////
+//checkAccess
+app.get('/tssgui/checkAccess', async (req, res) => {
+  const productId = req.query.productId;
+  const clientId = req.query.clientId;
+  const clientIp = req.query.clientIp;
+  const sessionId = req.query.sessionId;
+  const moduleId = req.query.moduleId;
+
+  logger.info("server.js ::: checkAccess ::: Recieved Request :::: moduleId ="+ moduleId+"tenantCode="+ req.query.tenantCode +"\n URL = "+url + '/checkModulePermission?productId='+productId+'&clientId='+clientId+'&moduleId='+moduleId+'&logAccess=0&clientIp='+clientIp+'&sessionId='+sessionId)
+
+  try {
+    const response = await fetch(url + '/modulePermission?productId='+productId+'&clientId='+clientId+'&moduleId='+moduleId,
+                    {agent,
+                      headers: {
+                        'Authorization': `Basic ${base64Credentials}`,
+                        'tssgui-tenant-id': req.query.tenantCode
+
+                    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: checkAccess ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//ConfirmAcctPassword
+app.get('/tssgui/confirmAccountPassword', async (req, res) => {
+  const password =  req.query.password;
+  const acctId = req.query.accountId;
+  const acctName = req.query.accountName;
+  logger.info("server.js ::: confirm account password ::: Recieved Request ::: password ::: "+password+" acctId ::: "+acctId+" acctName :::"+acctName);
+  try {
+    const response = await fetch(`${url}/confirmPassword?clientId=${acctId}&clientName=${acctName}&password=${password}`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      }
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: confirm account password ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.info("server.js ::: confirm account password ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//getAllProducts
+app.get('/tssgui/getAllProducts', async (req, res) => {
+  try {
+    logger.info("server.js ::: get all products :::");
+    const response = await fetch(url + '/product' ,
+    {agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: get all products ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: get all products ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//getallaccountTypes
+app.get('/tssgui/getAllAccountTypes', async (req, res) => {
+  const productId =  req.query.productId;
+  const acctId =  req.query.acctId;
+  logger.info("server.js ::: get all accountTypes ::: Recieved Request ::: productId="+productId+ " acctId = "+acctId);
+  try {
+    const response = await fetch(url + '/accessType?productId='+productId+'&clientId='+acctId ,
+    {agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: get all accountTypes  ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: get all accountTypes ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//getProductDetails
+app.get('/productDetails', async (req, res) => {
+  try {
+    const acctId = req.query.acctId;
+    logger.info("server.js ::: productDetails ::: Recieved Request :::  acctId = "+acctId);
+    const response = await fetch(url+'/product?accountId='+acctId,{agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+       'tssgui-tenant-id': req.query.tenantCode
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: productDetails  ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: productDetails  ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//                     PROFILE MODULE
+//////////////////////////////////////////////////////////////////////////
+//modify ProfileDetails
+app.post('/tssgui/modify/profileDetails', async (req, res) => {
+    logger.info("server.js ::: modify profileDetails ::: Received Request:"+ JSON.stringify(req.body) + " tenantCode:" + req.query.tenantCode);
+  try {
+    const response = await fetch(`${url}/profile`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': req.query.tenantCode
+      },
+      body: JSON.stringify(req.body),
+      method: 'PUT'
+    });
+
+
+    const data = await response.json();
+    logger.info("server.js ::: modify profileDetails  ::: Response ::: "+JSON.stringify(data));
+    res.status(response.status).json(data);
+  } catch (error) {
+    logger.error("server.js ::: modify profileDetails ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+/////////////////////////////////////////////////////////////////////////
+//changeProfilePassword
+app.post('/tssgui/changePassword', async (req, res) => {
+  logger.info("server.js ::: tssgui changePassword Profile:::  Received Request:"+ JSON.stringify(req.body) + " tenantCode:" + req.query.tenantCode);
+  try {
+    const response = await fetch(`${url}/change-account-password`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': req.query.tenantCode
+      },
+      body: JSON.stringify(req.body),
+      method: 'PUT'
+    });
+
+
+
+   const data = await response.json();
+logger.info("server.js ::: Response ::: " + JSON.stringify(data));
+res.status(response.status).json(data);
+  } catch (error) {
+    logger.error("server.js ::: tssgui changePassword Profile  ::: Error Connecting to external API:"+error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+///////////////////////////////////////////////////////////////////////////
+//getProfileDetails ::
+app.get('/tssgui/get/profile/details', async (req, res) => {
+  try {
+    logger.info("server.js ::: getProfileDetails ::: Received Request: accountId="+req.query.accountId+" userName="+req.query.userName+" tenantCode="+req.query.tenantCode);
+const apiUrl = `${url}/loginHistory?productId=${req.query.productId}&clientId=${req.query.acctId}`;
+
+console.log("Calling API URL:", apiUrl);
+console.log("tenantCode:",req.query.tenantCode);
+logger.info("Calling API URL: " + apiUrl);
+    const response = await fetch(url + '/loginHistory?productId='+req.query.productId+'&clientId='+req.query.acctId ,{agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'tssgui-tenant-id': req.query.tenantCode
+    }});
+    const rawText = await response.text();
+    console.log("Raw Response:", rawText);
+
+    if (!response.ok) {
+      throw new Error(rawText);
+    }
+
+    const data = JSON.parse(rawText);
+
+    console.log("Parsed Response:", data);
+    logger.info("Response ::: " + JSON.stringify(data));
+
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getProfileDetails ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//                     ACCOUNT TYPE MODULE
+//////////////////////////////////////////////////////////////////////////
+//getPermissionList
+app.get('/tssgui/getPermissions', async (req, res) => {
+  try {
+    logger.info("server.js ::: getPermissionList :::  Received Request: productId ="+req.query.productId);
+    const response = await fetch(url + '/permission/'+req.query.productId+'?clientId='+req.query.clientId ,{agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: getPermissionList ::: Response ::: "+JSON.stringify(data))
+   res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getPermissionList ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//getAllModulesSubModulesWithLinkPath
+app.get('/tssgui/getModulesSubmodules', async (req, res) => {
+  try {
+    logger.info("server.js ::: getAllModulesSubModulesWithLinkPath :::  Received Request: productId ="+req.query.productId+" groupId="+req.query.groupId+"accessType="+req.query.accessType);
+
+          console.log(url + '/submodules?productId='+req.query.productId+'&groupId='+req.query.groupId+'&moduleId=0'+'&accessType='+req.query.accessType+'&modulePid=0&clientId='+req.query.clientId);
+    const response = await fetch(url + '/submodules?productId='+req.query.productId+'&groupId='+req.query.groupId+'&moduleId=0'+'&accessType='+req.query.accessType+'&modulePid=0&clientId='+req.query.clientId ,{agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+          console.log(JSON.stringify(data))
+    logger.info("server.js ::: getAllModulesSubModulesWithLinkPath ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getAllModulesSubModulesWithLinkPath ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//getAllGroups
+app.get('/tssgui/getAllAccountGroups', async (req, res) => {
+  try {
+    const pdtId = req.query.productId;
+    logger.info("server.js :::tssgui getAllGroups ::: Received Request::: productId ="+req.query.productId);
+    const response = await fetch(url + '/groups/'+pdtId+'?clientId='+req.query.clientId ,{agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: tssgui getAllGroups ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: tssgui getAllGroups ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//getAllLandingPages
+app.get('/tssgui/getAllLandingPages', async (req, res) => {
+  try {
+    logger.info("server.js ::: getAllLandingPages :::: Received Request::: productId ="+req.query.productId+" groupId="+req.query.groupId);
+    const response = await fetch(url + '/landingPages/'+req.query.productId+'/'+req.query.groupId+'?clientId='+req.query.clientId ,{agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: getAllLandingPages ::: Response ::: ");
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getAllLandingPages ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//add Account Type
+app.post('/tssgui/addAccountType', async (req, res) => {
+  logger.info("server.js ::: add Account Type :::: Received Request::: "+JSON.stringify(req.body));
+  try {
+          console.log(`${url}/product/${req.query.productId}/accessType`)
+          console.log(JSON.stringify(req.body))
+
+    const response = await fetch(`${url}/product/${req.query.productId}/accountGroup/${req.query.accountGroupId}/accessType`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      },
+      body: JSON.stringify(req.body),
+      method: 'POST'
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+   console.log(JSON.stringify(data))
+    logger.info("server.js ::: add Account Type ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: add Account Type ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//modify Account Type
+app.put('/tssgui/modifyAccountType', async (req, res) => {
+  logger.info("server.js ::: modify Account Type :::  Received Request:"+  JSON.stringify(req.body));
+  try {
+
+          console.log(`${url}/product/${req.query.productId}/accountGroup/${req.query.accountGroupId}/accessType/${req.query.accountTypeId}`)
+
+          console.log( JSON.stringify(req.body))
+    const response = await fetch(`${url}/product/${req.query.productId}/accountGroup/${req.query.accountGroupId}/accessType/${req.query.accountTypeId}`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      },
+      body: JSON.stringify(req.body),
+      method: 'PUT'
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+    logger.info("server.js ::: modify Account Type ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: modify Account Type ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//delete Account Type
+app.delete('/tssgui/deleteAccountType', async (req, res) => {
+  const { accountTypeId, clientId, accountGroupId ,productId } = req.query;
+
+  logger.info("server.js :::: delete Account Type ::: Received Request:");
+
+        console.log(`${url}/product/${productId}/accountGroup/${0}/accessType/${accountTypeId}?clientId=${clientId}`);
+  try {
+    const response = await fetch(`${url}/product/${productId}/accountGroup/${0}/accessType/${accountTypeId}?clientId=${clientId}`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      },
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+    logger.info("server.js ::: delete Account Type ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: delete Account Type ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//                     ACCOUNTS MODULE
+//////////////////////////////////////////////////////////////////////////
+//getAccountDetails
+app.get('/tssgui/getAccountDetails', async (req, res) => {
+  const accountId = req.query.accountId
+  logger.info("server.js ::: getAccountDetails ::: Recieved Request ::: accountId = "+accountId);
+  try {
+          console.log(url + '/account/'+accountId+'?clientId='+req.query.clientId);
+    const response = await fetch(url + '/account/'+accountId+'?clientId='+req.query.clientId ,
+    {agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+          console.log(JSON.stringify(data))
+    logger.info("server.js ::: getAccountDetails ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getAccountDetails ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//getAcntList
+app.get('/tssgui/getAccountList', async (req, res) => {
+  const productId =  req.query.productId;
+  const acctId =  req.query.acctId;
+  logger.info("server.js ::: getAcntList ::: Recieved Request ::: accountId = "+acctId+"productId="+productId);
+  try {
+    const response = await fetch(url + '/accountList?productId='+productId+'&clientId='+acctId ,
+    {agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: getAcntList ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getAcntList ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//getAllLanguages
+app.get('/tssgui/getAllLanguages', async (req, res) => {
+  try {
+    logger.info("server.js ::: getAllLanguages :::");
+    const response = await fetch(url + '/languages' ,
+    {agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: getAllLanguages ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getAllLanguages ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//////////////////////////////////////////////////////////////////////////
+//addaccount
+app.post('/tssgui/addAccount', async (req, res) => {
+  logger.info("server.js ::: addaccount ::: Received Request :::"+  JSON.stringify(req.body));
+  try {
+    const response = await fetch(`${url}/account`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      },
+      body: JSON.stringify(req.body),
+      method: 'POST'
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+          console.log(JSON.stringify(data))
+    logger.info("server.js ::: addaccount ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: addaccount ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//modifyAccount
+app.put('/tssgui/modifyAccount', async (req, res) => {
+  logger.info("server.js ::: modifyaccount ::: Received request :"+  JSON.stringify(req.body));
+  try {
+    const response = await fetch(`${url}/account/${req.query.accountId}`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      },
+      body: JSON.stringify(req.body),
+      method: 'PUT'
+    });
+
+    if (!response.ok) {
+      logger.info("respose ="+response)
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+    logger.info("server.js ::: modifyaccount ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: modifyaccount ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//deleteAccount
+app.delete('/tssgui/deleteAccount', async (req, res) => {
+  const accountId = req.query.accountId;
+  const clientId = req.query.clientId;
+  const productId = req.query.productId;
+
+  logger.info("server.js ::: deleteaccount ::: Received request :");
+
+  try {
+    const response = await fetch(`${url}/account/${accountId}?clientId=${clientId}`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      },
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+    logger.info("server.js ::: deleteaccount ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: deleteaccount ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//getStatusCount
+app.get('/tssgui/getStatusCount', async (req, res) => {
+  try {
+  logger.info("server.js ::: getStatusCount ::: ");
+    const response = await fetch(url + '/statusCount?clientId='+req.query.clientId ,
+    {agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: getStatusCount ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getStatusCount ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//FilterAccounts
+app.get('/tssgui/getFilteredAccounts', async (req, res) => {
+  const productId =  req.query.productId;
+  const accountType =  req.query.accountType;
+  const status =  req.query.status;
+  const clientId = req.query.clientId;
+  logger.info("server.js ::: FilterAccounts ::: Recieved Request ::: productId="+productId+"accountType="+accountType+"status="+status);
+  try {
+    const response = await fetch(url + '/account?productId='+productId+'&accessType='+accountType+'&status='+status+'&clientId='+clientId,
+    {agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: FilterAccounts ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: FilterAccounts ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+/////////////////////////////////////////////////////////////////////
+//               ACTIVITY TRACKER MODULE
+//////////////////////////////////////////////////////////////////////
+//getAuditEventList
+app.get('/tssgui/getAuditEvents', async (req, res) => {
+  try {
+   logger.info("server.js ::: getAuditEventList ::: ");
+    const response = await fetch(url + '/auditLog/system/event' ,
+    {agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: getAuditEventList ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getAuditEventList ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////
+//getAuditDetails
+app.get('/tssgui/systemAudit', async (req, res) => {
+  const formattedFDate = req.query.fDate?.replace(' ', 'T');
+  const formattedTDate = req.query.tDate?.replace(' ', 'T');
+  try {
+  console.log("server.js ::: getAuditDetails ::: Recieved Request ::: "+url + '/auditLog/system?fromDate='+formattedFDate+'&toDate='+formattedTDate+'&accountId='+req.query.acctId+'&eventId='+req.query.eventId+'&productId='+req.query.productId);
+    const response = await fetch(url + '/auditLog/system?fromDate='+formattedFDate+'&toDate='+formattedTDate+'&accountId='+req.query.acctId+'&eventId='+req.query.eventId+'&productId='+req.query.productId  ,{agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: getAuditDetails ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getAuditDetails ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+////////////////////////////////////////////////////////////////////////
+//getProvGroupList
+app.get('/tssgui/getProvGroups', async (req, res) => {
+  const productId =  req.query.productId;
+  logger.info("server.js ::: getProvGroupList ::: Recieved Request ::: productId="+productId);
+  try {
+    const response = await fetch(url + '/auditLog/prov/group?productId='+productId ,
+    {agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: getProvGroupList ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getProvGroupList ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////
+//getProvEventList
+app.get('/tssgui/getProvEvents', async (req, res) => {
+  const productId =  req.query.productId;
+  const groupId =  req.query.groupId;
+  logger.info("server.js ::: getProvEventList ::: Recieved Request ::: productId="+productId+"groupId="+groupId);
+  try {
+    const response = await fetch(url + '/auditLog/prov/event?productId='+productId+'&groupId='+groupId ,
+    {agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: getProvEventList ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getProvEventList ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+///////////////////////////////////////////////////////////////
+//getProvTrackerDetails
+app.get('/tssgui/provAudit', async (req, res) => {
+  const productId =  req.query.prodId;
+  const eventId =  req.query.eventId;
+  const fDate =  req.query.fDate;
+  const tDate =  req.query.tDate;
+  const acctId = req.query.acctId;
+  const formattedFDate = req.query.fDate?.replace(' ', 'T');
+  const formattedTDate = req.query.tDate?.replace(' ', 'T');
+
+  try {
+    logger.info("server.js ::: getProvTrackerDetails ::: Recieved Request :::fDate="+fDate+"tDate="+tDate+"productId="+productId+"eventId="+eventId+"acctId="+acctId);
+    const response = await fetch(url + '/auditLog/prov?'+'fromDate='+formattedFDate+'&tDate='+formattedTDate+'&productId='+productId+'&eventId='+eventId+'&accountId='+acctId+'&clientId='+req.query.clientId,
+    {agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: getProvTrackerDetails ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getProvTrackerDetails ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+////////////////////////////////////////////////////////////////////////////////
+//                RESET PASSWORD MODULE
+///////////////////////////////////////////////////////////////////////////////
+//changeAccountPassword
+app.put('/tssgui/resetPassword', async (req, res) => {
+  logger.info("server.js ::: resetPassword ::: Received Request:"+  JSON.stringify(req.body));
+  try {
+    const response = await fetch(`${url}/resetAccountPassword`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      },
+      body: JSON.stringify(req.body),
+      method: 'PUT'
+    });
+
+    if (!response.ok) {
+      logger.info("respose ="+response)
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+    logger.info("server.js ::: resetPassword ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: resetPassword ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+/////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+app.get('/tssgui/AccountsDetails', async (req, res) => {
+  try {
+    const response = await fetch(url+'/det?productId=2345&date=yyyy-mm-dd hh:mm:ss&acctId=9999',{agent});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    logger.error('Error Connecting to external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+///////////////////////////////////////////////////////
+
+app.get('/tssgui/get/all/profile/details', async (req, res) => {
+  try {
+    const acctId = req.query.accountId;
+    const userName = req.query.userName;
+    logger.info("server.js :::tssgui/get/all/profile/details ::: Recieved Request :::  acctId="+acctId+"userName="+userName);
+    const response = await fetch(url + '/profile?clientName='+userName+'&clientId='+acctId ,
+    {agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.query.tenantCode
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: tssgui/get/all/profile/details ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: tssgui/get/all/profile/details ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//getMfaQrUrl
+app.get('/tssgui/mfa/qrUrl', async (req, res) => {
+  try {
+    const clientName = req.query.clientName;
+    const tenantCode = req.headers['tssgui-tenant-code'];
+    const mfaSecret  = req.query.mfaSecret;
+    logger.info("server.js ::: mfa/qrUrl ::: Received Request ::: clientName=" + clientName + " tenantCode=" + tenantCode);
+    const response = await fetch(`${url}/qrUrl?clientName=${encodeURIComponent(clientName)}&mfaSecret=${encodeURIComponent(mfaSecret)}`, {
+      agent,
+      headers: {
+        'tssgui-tenant-id': tenantCode || 'DEFAULT',
+        'Authorization': `Basic ${base64Credentials}`
+      }
+    });
+    const data = await response.json();
+    logger.info("server.js ::: mfa/qrUrl ::: Response ::: " + JSON.stringify(data));
+    res.status(response.status).json(data);
+  } catch (error) {
+    logger.error("server.js ::: mfa/qrUrl ::: Error Connecting to external API: " + error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//verifyMFA
+app.get('/tssgui/mfa/verify', async (req, res) => {
+  try {
+    const clientName = req.query.clientName;
+    const otp        = req.query.otp;
+    const tenantCode = req.headers['tssgui-tenant-code'];
+    logger.info("server.js ::: mfa/verify ::: Received Request ::: clientName=" + clientName + " tenantCode=" + tenantCode);
+    const response = await fetch(`${url}/verifyMFA?clientName=${encodeURIComponent(clientName)}&otp=${encodeURIComponent(otp)}`, {
+      agent,
+      headers: {
+        'tssgui-tenant-id': tenantCode || 'DEFAULT',
+        'Authorization': `Basic ${base64Credentials}`
+      }
+    });
+    const data = await response.json();
+    logger.info("server.js ::: mfa/verify ::: Response ::: " + JSON.stringify(data));
+    res.status(response.status).json(data);
+  } catch (error) {
+    logger.error("server.js ::: mfa/verify ::: Error Connecting to external API: " + error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+//enableMFA
+app.put('/tssgui/mfa/enable', async (req, res) => {
+  try {
+    const tenantCode = req.headers['tssgui-tenant-code'];
+    logger.info("server.js ::: mfa/enable ::: Received Request ::: " + JSON.stringify(req.body) + " tenantCode=" + tenantCode);
+    const response = await fetch(`${url}/enableMFA`, {
+      agent,
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': tenantCode || 'DEFAULT',
+        'Authorization': `Basic ${base64Credentials}`
+      },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    logger.info("server.js ::: mfa/enable ::: Response ::: " + JSON.stringify(data));
+    res.status(response.status).json(data);
+  } catch (error) {
+    logger.error("server.js ::: mfa/enable ::: Error Connecting to external API: " + error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////
+
+app.get('/tssgui/getFileUploadDetails', async (req, res) => {
+  try {
+     const acctId = req.query.acctId;
+     const fromDate = req.query.fromDate;
+     const toDate = req.query.toDate;
+     const productId = req.query.productId;
+     const transId = req.query.transId;
+    logger.info("server.js ::: Get File Upload Details ::: Received Request ::: transId="+transId+",fromDate="+fromDate+",toDate="+toDate+",acctId="+acctId+",productId="+productId+",tenantCode="+req.query.tenantCode);
+    const response = await fetch(url + '/getFileUploadDetails?transId='+transId+'&fromDate='+fromDate+'&toDate='+toDate+'&acctId='+acctId+'&productId='+productId ,
+    {agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'tssgui-tenant-id': req.query.tenantCode
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: get all FileUpload Details ::: Response ::: "+JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: get all FileUpload Details ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//////////////////////////////////////////////////////////////////////////
+
+app.get('/tssgui/downloadFile', async (req, res) => {
+  try {
+     const fileName = req.query.fileName;
+     const fileStatus = req.query.fileStatus;
+     const downloadUrl = url + '/downloadFile?fileName='+fileName+'&fileStatus='+fileStatus;
+     if(req.query.filePath != null)
+       downloadUrl += "&filePath="+req.query.filePath;
+    logger.info("server.js ::: Download File ::: Received Request ::: "+downloadUrl);
+    const response = await fetch(downloadUrl,
+    {agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'tssgui-tenant-id': req.query.tenantCode
+
+    }});
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file: ${response.statusText}`);
+    }
+
+    res.setHeader('Content-Disposition', response.headers.get('content-disposition') || `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Type', response.headers.get('content-type') || 'application/octet-stream');
+
+    // Pipe the stream to client
+    response.body.pipe(res);
+  } catch (error) {
+    logger.error("server.js ::: downloadFile ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+////////////////////////////////////////////////////////////////////////
+
+app.get('/get/all/modules', async (req, res) => {
+  try {
+    const response = await fetch(url + '/modules?productId='+productId+'&groupId='+groupId+'&moduleId='+'moduleId' ,{agent});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    logger.error('Error Connecting to external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+////////////////////////////////////////////////////////////////////////
+
+app.get('/get/accountType', async (req, res) => {
+  try {
+    const response = await fetch(url + '/accountTypeName?productId='+productId ,{agent});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    logger.error('Error Connecting to external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+////////////////////////////////////////////////////////////////////////
+//getAccessTypeDet
+app.get('/get/accountType/all/details', async (req, res) => {
+  try {
+    const response = await fetch(url + '/accountTypeAllDetails?productId='+productId+'&accessType='+'accessType' ,{agent});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    logger.error('Error Connecting to external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////
+
+app.get('/validate/access', async (req, res) => {
+  try {
+    logger.info("server.js ::: validate/access ")
+    const response = await fetch(url + '/validate' ,{agent});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: validate/access ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: validate/access ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+////////////////////////////////////////////////////////////////////
+
+app.get('/accessType/Count', async (req, res) => {
+  try {
+    logger.info("server.js ::: /accessType/Count ")
+    const response = await fetch(url + '/accountCount' ,{agent});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: /accessType/Count ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: /accessType/Count ::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+////////////////////////////////////////////////////////////////////////
+
+app.get('/get/all/submodules', async (req, res) => {
+  try {
+    logger.info("server.js ::: /get/all/submodules :::: Recieved Request ::: productId="+req.query.productId+"groupId="+req.query.groupId);
+    const response = await fetch(url + '/submodules?productId='+req.query.productId+'&groupId='+req.query.groupId+'&moduleId='+'moduleId' ,{agent});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: /get/all/submodules ::: Response ::: "+data);
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: /get/all/submodules::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+////////////////////////////////////////////////////////////////////////
+app.get('/getProductModules', async (req, res) => {
+  try {
+
+    const{productId,moduleId,accessType,clientId}=req.query;
+    logger.info("server.js ::: /getProductModules :::: Recieved Request ::: clientId="+clientId+"productId="+productId+"accessType="+accessType+"moduleId="+moduleId+" tenantCode="+req.query.tenantCode);
+    const response = await fetch(url + '/modules/sub?productId='+productId+'&moduleId='+moduleId+'&accessTypeId='+accessType+'&groupId=0&clientId='+clientId ,{agent ,
+      headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+       'tssgui-tenant-id': req.query.tenantCode
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js ::: /getProductModules::: Response ::: "+JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: /getProductModules::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//////////////////////////////////////////////////////////////////////////
+//getAddress
+app.get('/get/address', async (req, res) => {
+  try {
+      var clientIP= req.socket.remoteAddress;
+      const serverIP = getServerIPAddress();
+
+     if (clientIP.substr(0, 7) === '::ffff:') {
+       clientIP = clientIP.substr(7);
+      }
+      logger.info("server.js ::: /get/address::: Response ::: clientIP="+clientIP+"serverIP="+serverIP);
+    res.json({ clientIP, serverIP });
+  } catch (error) {
+    logger.error("server.js ::: /get/address::: Error Connecting to external API:"+ error);
+    res.status(500).json({ error: 'Failed to fetch IP addresses' });
+  }
+});
+
+
+//getJSON
+app.get('/tssgui/reports/getJSON', async (req, res) => {
+  const reportId = req.query.reportId;
+  const productId = req.query.productId;
+  logger.info("server.js :: tssgui :: getJSON :: Recieved Request :: reportId="+reportId+" productId="+productId+" tenantCode="+req.query.tenantCode);
+  try {
+    logger.info("server.js :: tssgui :: getJSON :: Recieved Request ::"+ url + '/reports/getJSON?reportId='+reportId+'&productId='+productId);
+    const response = await fetch(url + '/reports/getJSON?reportId='+reportId+'&productId='+productId,
+    {agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'tssgui-tenant-id': req.query.tenantCode
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js :: tssgui :: getJSON :: Response ::"+JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    logger.error('server.js :: tssgui :: getJSON :: Error Connecting to external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+app.get('/tssgui/reports/getFiltersData', async (req, res) => {
+  const reportId = req.query.reportId;
+  const productId = req.query.productId;
+  const accountId = req.query.accountId;
+  const param = req.query.param;
+  logger.info("server.js :: tssgui :: getFiltersData :: Recieved Request :: reportId="+reportId+" productId="+productId+" accountId="+accountId+" tenantCode="+req.query.tenantCode +"param="+param);
+  try {
+    const response = await fetch(url + '/reports/getFiltersData?reportId='+reportId+'&productId='+productId +"&_$acntId$_="+accountId+" "+param,
+    {agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+       'tssgui-tenant-id': req.query.tenantCode
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js :: tssgui :: getFiltersData :: Response ::"+JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    logger.error('server.js :: tssgui :: getFiltersData :: Error Connecting to external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+app.get('/tssgui/reports/getReportData', async (req, res) => {
+  const reportId = req.query.reportId;
+  const productId = req.query.productId;
+  const accountId = req.query.accountId;
+  const fromDate = req.query.fromDate;
+  const toDate = req.query.toDate;
+  const mode = req.query.mode;
+  let param = ""
+  if(req.query.params){
+    param = req.query.params;
+  }
+
+  logger.info("server.js :: tssgui :: getReportData :: Recieved Request :: reportId="+reportId+" productId="+productId+" accountId="+accountId+
+     "fromDate="+fromDate+" toDate="+toDate+" mode="+mode+" tenantCode="+req.query.tenantCode );
+  try {
+    logger.info("URL ="+ url + '/reports/getReportData?reportId='+reportId+'&productId='+productId +"&_$acntId$_="+accountId+"&_$fromDate$_="+fromDate+"&_$toDate$_="+toDate+"&_$mode$_="+mode+""+param);
+    const response = await fetch(url + '/reports/getReportData?reportId='+reportId+'&productId='+productId +"&_$acntId$_="+accountId+"&_$fromDate$_="+fromDate+"&_$toDate$_="+toDate+"&_$mode$_="+mode+""+param,
+    {agent,
+    headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'tssgui-tenant-id': req.query.tenantCode
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    logger.info("server.js :: tssgui :: getReportData :: Response ::"+JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    logger.error('server.js :: tssgui :: getReportData :: Error Connecting to external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+app.post('/generateToken', (req, res) => {
+  const { username, password, productId } = req.body;
+
+
+  const payload = { username, password, productId };
+  const token = jwt.sign(payload, 'login', { expiresIn: '2m' });
+  res.json({ token });
+});
+
+
+app.post('/decodeToken', (req, res) => {
+  const { token } = req.body;
+  try {
+    const decoded = jwt.verify(token, 'login');
+    res.json({ decoded });
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
+
+///////////////////////////////////////////////////////////////
+app.post('/sendOtpLogin', async (req, res) => {
+  try {
+    const username = req.query.username;
+    logger.info("sendOtpLogin ::: "+username+"::tenantCode::"+req.query.tenantCode);
+    const payload = {
+      clientName: username
+    };
+    const response = await fetch(url + '/otp/send',{agent,
+      headers: {
+      'Authorization': `Basic ${base64Credentials}`,
+      'Content-Type': 'application/json',
+      'tssgui-tenant-id': req.query.tenantCode
+    },
+     method: 'POST',
+     body: JSON.stringify(payload)
+   });
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    logger.error('Error Connecting to external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+////////////////////////////////////////////////////////////
+app.post('/verifyOtpLogin', async (req, res) => {
+  try {
+     logger.info("server.js ::: Login ::: verifyOtpLogin login ::: Recieved Request ::: "+JSON.stringify(req.body) + " tenantCode:" + req.query.tenantCode);
+     const response = await fetch(`${url}/otp/verify`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'Content-Type': 'application/json',
+        'tssgui-tenant-id': req.query.tenantCode
+      },
+      body: JSON.stringify(req.body),
+      method: 'POST'
+    });
+
+   /* if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }*/
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    logger.error('Error Connecting to external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//////////////////////////////////////////////////////////////
+//           Configuration
+///////////////////////////////////////////////////////////////
+
+app.get('/getConfigParamList', async (req, res) => {
+  try {
+    const moduleId = req.query.moduleId;
+    const sysVersionId = req.query.sysVersionId;
+
+    const furl = `${url}/configuration?moduleId=${moduleId}&sysVersionId=${sysVersionId}&appTxnRefId=transId`;
+
+    const response = await fetch(furl, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+    logger.info("server.js :: TSSGUI ::getConfigParamList :: Response data : " + JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching data from external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+/////////////////////////////////////////////////////////////////////
+app.get('/getConfigModuleList', async (req, res) => {
+  try {
+    const furl = `${url}/configuration/moduleList?appTxnRefId=transId`;
+
+    const response = await fetch(furl, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+    logger.info("server.js :: TSSGUI ::getConfigModuleList :: Response data : " + JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching data from external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////
+app.get('/getConfigkeyData', async (req, res) => {
+  try {
+    const configKey = req.query.configKey;
+    const sysVersionId = req.query.sysVersionId;
+
+    const furl = `${url}/configuration/${configKey}?appTxnRefId=transId&sysVersionId=${sysVersionId}`;
+
+    const response = await fetch(furl, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+	'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+    logger.info("server.js :: TSSGUI ::getConfigkeyData :: Response data : " + JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching data from external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+///////////////////////////////////////////////////////////////////////
+app.get('/getConfigListData', async (req, res) => {
+  try {
+    const configKey = req.query.configKey;
+    const sysVersionId = req.query.sysVersionId;
+
+    const furl = `${url}/configuration/${configKey}?sysVersionId=${sysVersionId}&appTxnRefId=transId`;
+
+    const response = await fetch(furl, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+	'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+    const responseData = Array.isArray(data) ? data : [data];
+    logger.info("server.js :: TSSGUI ::getConfigListData :: Response data : " + JSON.stringify(data));
+    res.json(responseData);
+  } catch (error) {
+    console.error('Error fetching data from external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+///////////////////////////////////////////////////////////////////////////
+app.patch('/saveNodeWiseConfVal', async (req, res) => {
+  try {
+    const configKey = req.query.configKey;
+    const sysVersionId = req.query.sysVersionId;
+    const furl =  `${url}/configuration/${configKey}?sysVersionId=${sysVersionId}&appTxnRefId=transId`;
+    logger.info("server.js :: TSSGUI :: saveNodeWiseConfVal :: Request Recieved :: URL : " + furl);
+
+    const response = await fetch(furl, {
+      agent,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      },
+      body: JSON.stringify(req.body),
+      method: 'PATCH'
+    });
+
+    if (!response.ok) {
+      const errorMessage = `Failed to Modify data from external API ${response.status}`;
+      logger.error(errorMessage);
+      return res.status(response.status).json({ error: "Failed to Modify" });
+    }
+
+    const data = await response.text();
+    logger.info("server.js :: TSSGUI ::saveNodeWiseConfVal :: Response data : " + JSON.stringify(data));
+    res.send(data);
+  } catch (error) {
+    logger.error('server.js :: TSSGUI :: saveNodeWiseConfVal ::Error Adding data from external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+/////////////////////////////////////////////////////////////////////////////////
+app.get('/getConfigHistDetails', async (req, res) => {
+  try {
+    const configKey = req.query.configKey;
+    const sysVersionId = req.query.sysVersionId;
+
+    const furl = `${url}/configuration/historyDetails/${configKey}?sysVersionId=${sysVersionId}&appTxnRefId=transId`;
+
+    const response = await fetch(furl, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`,
+        'tssgui-tenant-id': req.headers['tssgui-tenant-code']
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+
+    const data = await response.json();
+    logger.info("server.js :: TSSGUI ::getHistoryData :: Response data : " + JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching data from external API:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+/////////////////////////////////////////////////////////////////////////////
+app.get('/getProductManualPath', async (req, res) => {
+  try {
+    logger.info("server.js ::: /getProductManualPath :::: Recieved Request ::: productId="+req.query.productId);
+    const response = await fetch(url + '/product-manualPath/'+req.query.productId+'?&clientId='+req.query.clientId ,
+    {agent,
+     headers: {
+      'Authorization': `Basic ${base64Credentials}`
+    }});
+    if (!response.ok) {
+      throw new Error('Failed to fetch data from external API');
+    }
+    const data = await response.text();
+    logger.info("server.js ::: /getProductManualPath ::: Response ::: "+data);
+     res.send(data);
+  } catch (error) {
+    logger.error("server.js ::: /getProductManualPath ::: Error Connecting to external API:"+ error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+///////////////////////////////////////////////////////////////////////////////
+const httpsOptions = {
+  key: fs.readFileSync('/opt/tssgui/tssgui/cert/key.pem'),
+  cert: fs.readFileSync('/opt/tssgui/tssgui/cert/cert.pem'),
+};
+
+const getServerIPAddress= ()=> {
+  const interfaces = os.networkInterfaces();
+  for (const iface in interfaces) {
+    for (const alias of interfaces[iface]) {
+      if (alias.family === 'IPv4' && !alias.internal) {
+        return alias.address;
+      }
+    }
+  }
+  return '127.0.0.1'; // Default to localhost if no IP address is found
+}
+
+const httpsServer = https.createServer(httpsOptions, app);
+// Start the server
+httpsServer.listen(port,serverJsIP, () => {
+  //const serverIp = getServerIPAddress();
+        console.log(`Server IP Address: ${serverJsIP}`);
+  console.log(`Server is running on HTTPS port ${port}.`);
+});
+
+//////////////////////////////////////////////////////////////////
+app.post('/welcome/sendPasswordResetLink', async (req, res) => {
+ const { userName, clientIp, sessionId, productId } = req.body;
+logger.info("server.js :::sendPasswordResetLink:::userName:::"+userName+"::clientIp::"+clientIp+"::sessionId::"+sessionId+"::productId::"+productId+"::tenantCode::"+req.query.tenantCode);
+ try {
+     const payload = {
+       clientName: userName
+     }
+    const apiEndpoint = `${url}/password-reset-link`;
+    logger.info("Calling External API: sendPasswordResetLink " + apiEndpoint);
+
+    const response = await fetch(apiEndpoint, {
+      agent,
+      headers: {'Authorization': `Basic ${base64Credentials}`, 'Content-Type': 'application/json','tssgui-tenant-id': req.query.tenantCode },
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data from external API. Status: ${response.status}`);
+    }
+
+    const data = await response.text();
+    logger.info("API Response: " +data);
+    res.send(data);
+
+  } catch (error) {
+    logger.error("Error Connecting to external API: " + error);
+    res.status(500).json({ error: `Internal server error ---> sendPasswordResetLink: ${error}` });
+  }
+});
+
+/////////////////////////////////////////////////////////////////////////
+
+app.get('/welcome/verifyResetToken', async (req, res) => {
+  const token = req.query.token;
+
+  try {
+    const apiEndpoint = `${url}/reset-token/verify?token=${token}`;
+    logger.info("Calling External API: " + apiEndpoint+"::token::"+token+"::tssgui-tenant-id:::"+req.query.tenantCode);
+
+    const response = await fetch(apiEndpoint, {
+      agent,
+      headers: { 'Authorization': `Basic ${base64Credentials}`,'Content-Type': 'application/json','tssgui-tenant-id': req.query.tenantCode },
+      method: 'GET',
+    });
+
+   /* if (!response.ok) {
+      throw new Error(`Failed to fetch data from external API. Status: ${response.status}`);
+    }*/
+
+    const data = await response.json();
+    logger.info("API Response: " +data);
+    res.send(data);
+
+  } catch (error) {
+    logger.error("Error Connecting to external API: " + error);
+    res.status(500).json({ error: `Internal server error ---> verifyResetToken: ${error}` });
+  }
+});
+
+
+//////////////////////////////////////////////////////////////////////////
+
+app.post('/welcome/forgotPasswordReset', async (req, res) => {
+//  const { password, token, acctId, clientIp, sessionId, productId } = req.body;
+
+  logger.info("server.js :::forgotPasswordReset::::"+req.body);
+  try {
+    const apiEndpoint = `${url}/password-reset`;
+    logger.info("Calling External API: forgotPasswordReset " + apiEndpoint);
+
+    const response = await fetch(apiEndpoint, {
+      agent,
+      headers: {'Authorization': `Basic ${base64Credentials}`, 'Content-Type': 'application/json' ,'tssgui-tenant-id': req.query.tenantCode},
+      method: 'POST',
+      body: JSON.stringify(req.body)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data from external API. Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    logger.info("API Response: forgotPasswordReset " +data);
+    res.send(data);
+
+  } catch (error) {
+    logger.error("Error Connecting to external API: " + error);
+    res.status(500).json({ error: `Internal server error ---> sendPasswordResetLink: ${error}` });
+  }
+});
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+app.get('/getServerTime', async (req, res) => {
+  try {
+    const response = await fetch(`${url}/serverDatetime`, {
+      agent,
+      headers: {
+        'Authorization': `Basic ${base64Credentials}`
+      },
+      method: 'GET'
+    });
+
+    const data = await response.text();
+    logger.info("server.js ::: getServerTime ::: Response ::: " + JSON.stringify(data));
+    res.json(data);
+  } catch (error) {
+    logger.error("server.js ::: getServerTime::: Error Connecting to external API ::: " + error);
+    if (error.name === 'FetchError' || error.code === 'ECONNREFUSED') {
+      logger.error("server.js :: getServerTime ::: Network error or external API not reachable ::: " + error.message);
+      return res.status(502).json({ error: 'External API not reachable.' });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+app.post('/tssgui/exportTssDataTablePdf', async (req, res) => {
+  const { headers, dataRows, fileName } = req.body;
+
+  try {
+    const browser = await chromium.launch({ headless: true });
+    const page = await browser.newPage();
+    const colCount = headers.length;
+
+    const html = `
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            :root {
+              --col-count: ${colCount};
+            }
+            body {
+              font-family: "Noto Sans", "Noto Color Emoji", "Noto Sans Symbols", system-ui, sans-serif;
+              font-size: 8px;
+              padding: 20px;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              table-layout: fixed;
+            }
+            th, td {
+              padding: 4px;
+              font-size: 10px;
+              text-align: center;
+              vertical-align: middle;
+              word-break: break-word;
+              overflow-wrap: break-word;
+              width: calc(100% / var(--col-count));
+            }
+            th {
+              font-weight: bold;
+              background-color: #5D8DB3;
+              color: white;
+            }
+            tbody tr:nth-child(even) {
+              background-color: #ffffff;
+            }
+            tbody tr:nth-child(odd) {
+              background-color: #f9f9f9;
+            }
+          </style>
+        </head>
+        <body>
+          <table>
+            <thead>
+              <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+            </thead>
+            <tbody>
+              ${dataRows
+                .map(row => `<tr>${row.map(col => `<td>${col ?? ''}</td>`).join('')}</tr>`)
+                .join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
+
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      landscape: true,
+      printBackground: true,
+      margin: { top: '30px', bottom: '30px', left: '20px', right: '20px' },
+    });
+
+    await browser.close();
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}.pdf"`);
+    res.send(pdfBuffer);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error generating PDF');
+  }
+});
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+

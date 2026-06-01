@@ -1,0 +1,4 @@
+.modal-backdrop {
+    backdrop-filter: blur(1px); 
+    background-color: rgba(0, 0, 0, 0.5); 
+}

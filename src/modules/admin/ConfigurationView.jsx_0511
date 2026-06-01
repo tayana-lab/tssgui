@@ -1,0 +1,364 @@
+import TssDataTable from '@app/modules/common/default/components/TssDataTable'
+import React, { useState, useEffect } from 'react'
+import TssIcon from '@app/modules/common/default/components/TssIcon';
+import TssCheckbox from '@app/modules/common/default/components/TssCheckbox';
+import { confirmAction, infoAlert, showToast } from '@app/modules/common/default/components/TssFunction';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
+import TssSpinner from '@app/modules/common/default/components/TssSpinner'
+import Log from '@app/modules/common/default/components/TssGUILog';
+import encryptPayload from '@app/modules/common/default/js/encryptPayload.js';
+import tssguiConf from '@modules/conf/TssGui.json'
+import TssSelectBox from '@app/modules/common/default/components/TssSelectBox';
+import TssModal from '@app/modules/common/default/components/TssModal';
+
+
+
+const ConfigurationView = ({ LoadAddPage, LoadSearchPage, tempVariable, checkPermission, moduleId }) => {
+  const addPermission = (checkPermission & 4) == 4;
+  const modPermission = (checkPermission & 2) == 2;
+  const delPermission = (checkPermission & 8) == 8;
+  const sysVersionId = tssguiConf.sysVersionId;
+  const clientName = localStorage.getItem("acctName");
+  const productId = localStorage.getItem("productID");
+  const clientID = localStorage.getItem("acctID");
+  const clientIP = localStorage.getItem("clientIP");
+  const serverIp = localStorage.getItem("serverIP");
+  const sessionID = localStorage.getItem("sessionID");
+  const userName = localStorage.getItem("username");
+
+  const [t] = useTranslation();
+  const Url = tssguiConf.SERVER_JS_API_URI;
+  const [Data, setData] = useState([]);
+  const [Confirmmodal, setConfirmmodal] = useState(false);
+  const [Configurationlist, setConfigurationlist] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshCount, setRefreshCount] = useState(0);
+  const [ConfigurationHistorylist, setConfigurationHistorylist] = useState([]);
+  const [HistoryrefreshCount, setHistoryRefreshCount] = useState(0);
+  const [ConfigListDataList, setConfigListDataList] = useState([]);
+
+  const [listOptionsCache, setListOptionsCache] = useState({});
+  const [configKey, setConfigKey] = useState('')
+
+  const [DisplayText,setDisplayText]= useState('');
+
+
+  const refreshTable = () => {
+    setRefreshCount(refreshCount + 1)
+  }
+
+  const HistoryrefreshTable = () => {
+    setHistoryRefreshCount(HistoryrefreshCount + 1)
+  }
+
+  const getLabelFromvalue = (value, options) => {
+    const option = options.find(opt => opt.value == value);
+    return option ? option.label : null;
+  }
+
+  const historyDetailsModal = {
+    "data-toggle": "modal",
+    "data-target": "#historyDetails"
+
+  }
+
+  const cancelProp =
+  {
+    "data-dismiss": "modal",
+    "data-target": "#historyDetails"
+
+  };
+
+
+  const fetchHistoryConfigurationData = async (key, field) => {
+    try {
+      let listOptions = [];
+
+      //  Use only cached list
+      if ((field === "M" || field === "L") && listOptionsCache[key]) {
+        listOptions = listOptionsCache[key];
+      }
+
+      const encryptedData = await encryptPayload({ configKey: key, sysVersionId }, tssguiConf.encryptionKey);
+      const response = await fetch(`${Url}/getConfigHistDetails?key=${encodeURIComponent(encryptedData.encryptedKey)}&data=${encodeURIComponent(encryptedData.encryptedPayload)}&iv=${encodeURIComponent(encryptedData.iv)}`, { headers: { 'tssgui-tenant-code': localStorage.getItem('tenantCode') } });
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const data = await response.json();
+      Log('Configuration History Details', 'INFO', 'Data fetched successfully: ' + JSON.stringify(data));
+      const updatedHistory = data.map(item => {
+        let oldVal = item.OLD_CONFIG_VALUE || "-";
+        let newVal = item.NEW_CONFIG_VALUE || "-";
+
+        if (field === "M") {
+          const oldVals = item.OLD_CONFIG_VALUE?.split(',').map(v => v.trim()) || [];
+          const newVals = item.NEW_CONFIG_VALUE?.split(',').map(v => v.trim()) || [];
+
+          const oldLabels = oldVals.map(val => getLabelFromvalue(val, listOptions)).filter(Boolean);
+          const newLabels = newVals.map(val => getLabelFromvalue(val, listOptions)).filter(Boolean);
+
+          oldVal = oldLabels.length > 0 ? oldLabels.join(', ') : "-";
+          newVal = newLabels.length > 0 ? newLabels.join(', ') : "-";
+        } else if (field === "L") {
+          oldVal = getLabelFromvalue(item.OLD_CONFIG_VALUE, listOptions) || "-";
+          newVal = getLabelFromvalue(item.NEW_CONFIG_VALUE, listOptions) || "-";
+        }
+
+        return {
+          ...item,
+          OLD_CONFIG_VALUE: oldVal,
+          NEW_CONFIG_VALUE: newVal
+        };
+      });
+
+      setConfigurationHistorylist(updatedHistory);
+      setHistoryRefreshCount(prev => prev + 1);
+    } catch (error) {
+      Log('ConfigurationHistorylist', 'ERROR', 'Error fetching data: ' + error);
+    }
+  };
+
+
+
+
+
+  const loadHistoryDetails = (rowData) => {
+    const key =rowData.configKey
+    const field =rowData.fieldType
+    setConfigKey(key); // sets 
+    setDisplayText(rowData.displayText);
+    fetchHistoryConfigurationData(key, field)
+  };
+
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+
+      const encryptedData = await encryptPayload({ moduleId, sysVersionId }, tssguiConf.encryptionKey);
+      const response = await fetch(`${Url}/getConfigParamList?key=${encodeURIComponent(encryptedData.encryptedKey)}&data=${encodeURIComponent(encryptedData.encryptedPayload)}&iv=${encodeURIComponent(encryptedData.iv)}`, { headers: { 'tssgui-tenant-code': localStorage.getItem('tenantCode') } });
+      if (!response.ok) throw new Error('Network response was not ok');
+
+      const data = await response.json();
+      Log('Configuration', 'INFO', 'Data fetched successfully : ' + JSON.stringify(data));
+      const filteredData = data.filter(item => item.accessLevel !== 0 && item.accessLevel !== '0');
+
+      let updatedData = [];
+      let tempCache = { ...listOptionsCache };
+
+      for (const item of filteredData) {
+        let label = item.configValue || '-';
+
+        if (item.fieldType === 'L' || item.fieldType === 'M') {
+          let listOptions = tempCache[item.configKey];
+
+          // Fetch list options if not already cached
+          if (!listOptions) {
+            const listEncryptedData = await encryptPayload({ configKey: item.configKey, sysVersionId }, tssguiConf.encryptionKey);
+            const listRes = await fetch(`${Url}/getConfigListData?key=${encodeURIComponent(listEncryptedData.encryptedKey)}&data=${encodeURIComponent(listEncryptedData.encryptedPayload)}&iv=${encodeURIComponent(listEncryptedData.iv)}`, { headers: { 'tssgui-tenant-code': localStorage.getItem('tenantCode') } });
+            if (listRes.ok) {
+              /*const listData = await listRes.json();
+              listOptions = listData.map(opt => ({
+                label: opt.displayText,
+                value: opt.CONFIG_VALUE
+              }));*/
+	      const listData = await listRes.json();
+		listOptions = [{
+  		label: listData.displayText,
+  		value: listData.configValue
+		}];
+
+              tempCache[item.configKey] = listOptions;
+            }
+          }
+
+          if (item.fieldType === 'M') {
+            const values = item.configValue?.split(',').map(v => v.trim()) || [];
+            const labels = values
+              .map(val => getLabelFromvalue(val, listOptions))
+              .filter(Boolean); // Remove null/undefined
+            label = labels.length > 0 ? labels.join(', ') : '-';
+          } else {
+            label = getLabelFromvalue(item.configValue, listOptions) || '-';
+          }
+        }
+
+        updatedData.push({ ...item, ConfigValueLabel: label });
+      }
+      setListOptionsCache(tempCache);
+      setConfigurationlist(updatedData);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      Log('Application', 'ERROR', 'Error fetching data : ' + error);
+    }
+  };
+
+
+
+  useEffect(() => {
+    fetchData();
+  }, [tempVariable, refreshCount]);
+
+
+
+
+  const buttons = (rowData, index) => {
+    // const isDeleteDisabled = !delPermission || rowData.deleteEnable === 0;
+    const isDeleteDisabled = rowData.deleteEnable === 0;
+    return (
+      <div>
+        <TssIcon iconKey="tss_edit" onClick={() => LoadSearchPage(rowData, index)} title={t("modules.Generic.TssDataTable.button.title.edit")}
+        // isDisabled={!modPermission}
+        />
+
+
+        <span className="button-gap" style={{ marginLeft: '10px' }}></span>
+        <TssIcon
+          iconKey="tss_copy"
+          iconProps={historyDetailsModal}
+          onClick={() => loadHistoryDetails(rowData)}
+          title={t("Configuration.historyDetails.historyLabel")}
+        />
+
+
+      </div>
+    )
+  }
+
+
+  const customButtons = () => {
+    return (
+      <>
+        {/* <TssIcon iconKey="tss_add" onClick={LoadAddPage} title={t("modules.Generic.buttons.title.add")} 
+                    isDisabled={!addPermission}
+                    />  */}
+        <span className="button-gap" style={{ marginLeft: '10px' }}></span>
+        <TssIcon iconKey="tss_refresh" onClick={refreshTable} title={t("modules.Generic.buttons.title.refresh")} />
+
+      </>
+    );
+  };
+
+
+  const historycustomButtons = () => {
+    return (
+      <>
+        {/* <TssIcon iconKey="tss_add" onClick={LoadAddPage} title={t("modules.Generic.buttons.title.add")} 
+                        isDisabled={!addPermission}
+                        />  */}
+        <span className="button-gap" style={{ marginLeft: '10px' }}></span>
+        <TssIcon iconKey="tss_refresh" onClick={HistoryrefreshTable} title={t("modules.Generic.buttons.title.refresh")} />
+
+      </>
+    );
+  };
+
+  let columns = [
+    { field: 'displayText', 
+      header: t("Configuration.ConfigurationView.Parameter"), 
+      sortable: true, 
+      filter: true ,
+       body: (rowData) => (
+    <span title={rowData.configKey || ''}>
+      {rowData.displayText}
+    </span>
+       )
+    },
+    { field: 'ConfigValueLabel',
+       header: t("Configuration.ConfigurationView.ConfigValue"),
+        sortable: true, filter: true,
+      body: (rowData) => (
+    <div
+      style={{
+        textAlign: rowData.configType === 'N' && 'right'
+      }}
+    >
+      {rowData.ConfigValueLabel}
+    </div>
+  )
+ },
+ 
+// { field: 'CONFIG_DEFAULT_TEXT', header: t("Configuration.ConfigurationView.DefaultValue"), sortable: true, filter: true },
+ 
+ {
+      field: 'RELOADABLE', header: t('Reloadable'), sortable: true, filter: true,
+      body: (rowData) => rowData.RELOADABLE === 1 || rowData.RELOADABLE === '1' ? '✅' : '❌',
+      style: { textAlign: "center" }
+    },
+    { field: 'helpText', header: t("Configuration.ConfigurationView.description"), sortable: true, filter: true },
+    { 
+      field: 'groupName', 
+      header: t('groupName'), 
+      sortable: true, 
+      filter: true,
+      style: { fontWeight:"bold", fontSize:"15pt" }
+    },
+    {
+      field: 'disableButton',
+      header: '',
+      sortable: false,
+      filter: false,
+      body: (rowData, index) => buttons(rowData, index),
+      style: { textAlign: 'center' }
+    },
+  ];
+
+
+  let historycolumns = [
+    { field: 'MODIFIED_TIME', header: t("Configuration.historyDetails.ModifiedTime"), sortable: true, filter: true },
+    { field: 'ACCT_NAME', header: t("Configuration.historyDetails.ModifiedBy"), sortable: true, filter: true },
+    { field: 'OLD_CONFIG_VALUE', header: t("Configuration.historyDetails.OldValue"), sortable: true, filter: true },
+    { field: 'NEW_CONFIG_VALUE', header: t("Configuration.historyDetails.NewValue"), sortable: true, filter: true },
+    { field: 'comment', header: t("Configuration.historyDetails.Comment"), sortable: true, filter: true },
+
+
+    // {
+    //   field: 'disableButton',
+    //   header: '',
+    //   sortable: false,
+    //   filter: false,
+    //   body: (rowData, index) => buttons(rowData, index),
+    //   style:{textAlign:'center'}
+    // },
+  ];
+
+  return (
+    <div>
+
+      {loading ? (<TssSpinner isLoading={loading} />
+      ) : (
+        <>
+          <div className="card">
+            <div className="card-body d-flex align-items-center py-8">
+              <div style={{ width: '100%' }} >
+                <TssDataTable moduleName={t('Configuration.label')} columnsDisplay={false}
+                  columns={columns} data={Configurationlist} fileName={t('Configuration.label')}
+                  globalFilterDisplay={true} pagination={false} downloadButtonDisplay={true}
+                  paginatorDisplay={true} buttons={customButtons}
+                  rowsGroupReq={true}
+                  rowGroupFeild="groupName"
+                />
+              </div>
+
+
+              <div>
+                <TssModal modalId="historyDetails" modalBodyId="historyDetailsbody" className="modal-xl" header={t('Change History')}>
+                  <TssDataTable key={HistoryrefreshCount}
+                    moduleName={DisplayText}
+                    columnsDisplay={false} columns={historycolumns}
+                    data={ConfigurationHistorylist} fileName={DisplayText}
+                    globalFilterDisplay={true} pagination={true}
+                    downloadButtonDisplay={false} paginatorDisplay={true}
+                  />
+                </TssModal>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+export default ConfigurationView

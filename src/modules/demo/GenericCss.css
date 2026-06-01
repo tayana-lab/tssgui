@@ -1,0 +1,139 @@
+
+.p-paginator {
+  display: flex;
+  justify-content: flex-end;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.tss-edit, .tss-add, .tss-refresh, .fa-download{
+	color:#006bb6; 
+	cursor: pointer; 
+}
+
+.tss-delete{
+	color: red;
+	cursor: pointer; 
+}
+
+.tssDT-custom-button{
+ text-align: center; 
+}
+
+.tssDT-download-options{
+	
+ list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.tssDT-download-options li {
+  margin-right: 10px; /* Adjust the spacing between items */
+}
+
+/* Additional styles for the tooltip */
+.p-tooltip {
+  max-width: 200px; /* Adjust the maximum width of the tooltip */
+}
+
+.p-tooltip .p-tooltip-content {
+ background: transparent !important;
+}
+
+.p-tooltip .p-tooltip-arrow {
+  display: none; /* Hide the tooltip arrow */
+}
+
+.p-datatable.p-datatable-striped .p-datatable-tbody > tr.p-row-odd
+{
+	background : #e7eaee;
+}
+
+.p-datatable-header
+{
+	background : white;
+	padding-top: 0px;
+	border-top-right-radius: 10px;
+	border-top-left-radius: 10px;
+}
+
+
+.p-datatable .p-datatable-thead > tr > th {
+    background-color: lightgray; /* Replace with your desired background color */
+    padding: 1px
+}
+.p-column-title{
+  margin-left: 6px;
+}
+.p-datatable.p-datatable-striped .p-datatable-tbody > tr:hover {
+    background-color: #dde4ec;
+}
+
+.list-unstyled.d-flex > li {
+    	margin-right: -8px;
+	margin-left: -8px;
+}
+
+.list-unstyled.d-flex > li > a {
+	background : none;
+}
+
+.p-paginator-current {
+	cursor: default;
+}
+
+.p-tieredmenu {
+    display: flex;
+    flex-direction: row;
+    width: auto;
+}
+
+.p-tieredmenu > ul {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: -3px;
+    margin-top: -4px;
+    margin-left: -28px
+}
+
+.p-tieredmenu > ul > li 
+{
+	    margin: -5px;
+}
+
+.p-tieredmenu > ul > li > .p-menuitem-content
+{
+	    background: none;
+}
+
+.tssDTDownloadBtn:focus,
+.tssDTDownloadBtn:active {
+    outline: none;
+   box-shadow:none; 
+}
+
+/* rgb(218, 22, 32); */
+.nav-tabs .nav-link.active.active-tab {
+  border-top: 3px solid rgb(56, 114, 190);
+  border-radius:4px;
+  font-weight: bold;
+  color:rgb(56, 114, 190);
+}
+
+.nav-link {
+  color: rgb(110, 107, 107); 
+  font-weight: bold;
+}
+
+.nav-right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding-top: 7px;
+}
+
+.nav-tabs{
+  position: relative;
+}
