@@ -14,8 +14,8 @@ const Footer = () => {
         target="_blank"
         rel="noopener noreferrer"
         style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: 600 }}
-        onMouseEnter={(e) => ((e.target as HTMLAnchorElement).style.textDecoration = 'underline')}
-        onMouseLeave={(e) => ((e.target as HTMLAnchorElement).style.textDecoration = 'none')}
+        onMouseEnter={(e) => (e.target.style.textDecoration = 'underline')}
+        onMouseLeave={(e) => (e.target.style.textDecoration = 'none')}
       >
         {t('bottomnavi.label.companyName')}
       </a>

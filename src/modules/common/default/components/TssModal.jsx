@@ -57,9 +57,9 @@ const TssModal = ({
     const focusables = el.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
-    if (focusables.length) (focusables[0] as HTMLElement).focus();
-    const enforceFocus = (e: Event) => {
-      if (!el.contains(e.target as Node)) {
+    if (focusables.length) focusables[0].focus();
+    const enforceFocus = (e) => {
+      if (!el.contains(e.target)) {
         e.stopImmediatePropagation();
         el.focus();
       }
@@ -71,7 +71,7 @@ const TssModal = ({
   /* ---- Keyboard: close on Escape ---- */
   useEffect(() => {
     if (!visible) return;
-    const onKeyDown = (e: KeyboardEvent) => {
+    const onKeyDown = (e) => {
       if (e.key === 'Escape') handleClose();
     };
     document.addEventListener('keydown', onKeyDown);
@@ -92,8 +92,8 @@ const TssModal = ({
 
     /* Polyfill for legacy `window.$('#id').modal('show')` callers */
     if (!window.$) {
-      (window as any).$ = (selector: string) => ({
-        modal: (action: string) => {
+      window.$ = (selector) => ({
+        modal: (action) => {
           if (action === 'show' || action === 'toggle') setInternalOpen(true);
           if (action === 'hide')                         setInternalOpen(false);
         },

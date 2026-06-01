@@ -136,6 +136,18 @@ body.dark-mode {
 
   --color-btn-primary:    #347DC1;
   --color-btn-primary-hover: #4797E2;
+
+  --color-input-bg:       #161B22;
+  --color-input-border:   #30363D;
+  --color-input-focus:    #4797E2;
+
+  --color-text:           #E6EDF3;
+  --color-text-muted:     #8B949E;
+  --color-text-invert:    #0D1117;
+
+  --color-primary:        #4797E2;
+  --color-primary-dark:   #347DC1;
+  --color-primary-light:  #1F2937;
 }
 
 /* ====================================================
@@ -162,6 +174,11 @@ body.blue-mode {
   --color-table-header:   #D1E5F6;
   --color-table-hover:    #EBF3FB;
   --color-table-border:   #bdd6f0;
+
+  --color-text:           #1A202C;
+  --color-text-muted:     #4A5568;
+  --color-input-bg:       #ffffff;
+  --color-input-border:   #bdd6f0;
 }
 
 /* ====================================================

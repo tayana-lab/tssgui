@@ -10,7 +10,6 @@ import ReactGA from 'react-ga4';
 
 import PublicRoute from './routes/PublicRoute';
 import PrivateRoute from './routes/PrivateRoute';
-import '@modules/common/default/scss/TssCommonCss.scss';
 
 import { setAuthentication } from '@app/modules/common/default/store/reducers/auth';
 import {

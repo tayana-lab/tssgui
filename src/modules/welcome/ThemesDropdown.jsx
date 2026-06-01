@@ -1,123 +1,118 @@
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faMoon, faSeedling} from '@fortawesome/free-solid-svg-icons';
+import { faSun, faMoon, faSeedling } from '@fortawesome/free-solid-svg-icons';
 import { toggleDarkMode, toggleBlueMode } from '@app/modules/common/default/store/reducers/ui';
 import { useDispatch, useSelector } from 'react-redux';
-import {useState} from 'react';
 import { useTranslation } from 'react-i18next';
 import TssIcon from '@app/modules/common/default/components/TssIcon';
-const ThemesDropdown = () => {
 
+const ThemesDropdown = () => {
   const dispatch = useDispatch();
-   const [t]= useTranslation();
+  const [t] = useTranslation();
   const darkMode = useSelector((state) => state.ui.darkMode);
   const blueMode = useSelector((state) => state.ui.blueMode);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
- const [isHovered, setIsHovered] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
+  /* ---- Business logic — unchanged ---- */
   const handleDarkModeChange = (mode) => {
-  
-   if (darkMode !== mode) {
-      dispatch(toggleDarkMode());
-      
-    }
-  };
-	const handleblueModeChange = (mode) =>{
-            
-	if (blueMode !== mode) {
-           
-		dispatch(toggleBlueMode());
-}
-}
-
- const handleLightMode = () => {
-    if (darkMode) {
-      dispatch(toggleDarkMode());
-    }
-    if (blueMode) {
-      dispatch(toggleBlueMode());
-    }
+    if (darkMode !== mode) dispatch(toggleDarkMode());
   };
 
+  const handleBlueModeChange = (mode) => {
+    if (blueMode !== mode) dispatch(toggleBlueMode());
+  };
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
+  const handleLightMode = () => {
+    if (darkMode) dispatch(toggleDarkMode());
+    if (blueMode) dispatch(toggleBlueMode());
   };
 
   return (
-
-   <li>
-      <div
-        className="dropdown"
-        style={{ position: 'relative' }} 
-        onMouseEnter={() => setIsHovered(true)}  
-        onMouseLeave={() => setIsHovered(false)} 
+    <div
+      className="relative flex items-center"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Trigger button */}
+      <button
+        type="button"
+        className="tss-topbar-icon-btn"
+        title={t('topnavi.title.theme')}
+        aria-label={t('topnavi.title.theme')}
+        aria-haspopup="true"
+        aria-expanded={isHovered}
       >
-        <a slot="head"
-          style={{ fontWeight: 'normal', cursor: 'pointer',display: 'flex' }} 
+        <TssIcon
+          iconKey={darkMode ? 'tss_darkTheme' : 'tss_lightTheme'}
           title={t('topnavi.title.theme')}
-        >
-          <div className="mt-2"  style={{ marginLeft: "-15px" }}>
-            {!darkMode ? (
-              <TssIcon iconKey="tss_lightTheme" title={t('topnavi.title.theme')} />
-            ) : (
-              <TssIcon iconKey="tss_darkTheme" title={t('topnavi.title.theme')} />
-            )}
-          </div>
-        </a>
+        />
+      </button>
 
+      {/* Dropdown panel */}
+      {isHovered && (
         <div
-          className="dropdown-menu dropdown-menu-right"
-          aria-labelledby="dropdownMenuLink"
-          style={{
-            width: 'auto',
-            position: 'absolute',
-            top: '25px',
-            right: 0,
-            left: 'auto',
-            display: isHovered ? 'block' : 'none', 
-            zIndex: 9999,
-          }}
+          className="tss-dropdown"
+          style={{ top: '36px', right: 0, position: 'absolute' }}
+          role="menu"
+          aria-label="Theme selector"
         >
+          {/* Light */}
           <button
             type="button"
-            className={`dropdown-item ${!darkMode && !blueMode ? 'active' : ''}`}
+            role="menuitem"
+            className={`tss-dropdown-item w-full${!darkMode && !blueMode ? ' font-semibold' : ''}`}
             onClick={handleLightMode}
-            style={{ cursor: 'pointer' }}
           >
-            <FontAwesomeIcon icon={faSun} className='mr-2 fasSun' />
+            <FontAwesomeIcon icon={faSun} className="w-4 text-amber-500" />
             <span>Light</span>
+            {!darkMode && !blueMode && (
+              <span
+                className="ml-auto w-2 h-2 rounded-full"
+                style={{ backgroundColor: 'var(--color-primary)' }}
+                aria-hidden="true"
+              />
+            )}
           </button>
 
+          {/* Dark */}
           <button
             type="button"
-            className={`dropdown-item ${darkMode ? 'active' : ''}`}
+            role="menuitem"
+            className={`tss-dropdown-item w-full${darkMode ? ' font-semibold' : ''}`}
             onClick={() => handleDarkModeChange(true)}
-            style={{ cursor: 'pointer' }}
           >
-            <FontAwesomeIcon icon={faMoon} className='mr-2' />
+            <FontAwesomeIcon icon={faMoon} className="w-4 text-indigo-400" />
             <span>Dark</span>
+            {darkMode && (
+              <span
+                className="ml-auto w-2 h-2 rounded-full"
+                style={{ backgroundColor: 'var(--color-primary)' }}
+                aria-hidden="true"
+              />
+            )}
           </button>
 
+          {/* Blue */}
           <button
             type="button"
-            className={`dropdown-item ${blueMode ? 'active' : ''}`}
-            onClick={() => handleblueModeChange(true)}
-            style={{ cursor: 'pointer' }}
+            role="menuitem"
+            className={`tss-dropdown-item w-full${blueMode ? ' font-semibold' : ''}`}
+            onClick={() => handleBlueModeChange(true)}
           >
-            <FontAwesomeIcon icon={faSeedling} className='mr-2' />
+            <FontAwesomeIcon icon={faSeedling} className="w-4 text-blue-500" />
             <span>Blue</span>
+            {blueMode && (
+              <span
+                className="ml-auto w-2 h-2 rounded-full"
+                style={{ backgroundColor: 'var(--color-primary)' }}
+                aria-hidden="true"
+              />
+            )}
           </button>
         </div>
-      </div>
-    </li>
-
-
-
-
-
-
-  )
-
-}
+      )}
+    </div>
+  );
+};
 
 export default ThemesDropdown;
