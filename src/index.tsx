@@ -6,7 +6,6 @@ import './index.css';
 import store from '@app/modules/common/default/store/store';
 
 import '@app/modules/common/default/utils/i18n';
-import '@app/modules/common/default/scss/TssCommonCss.scss';
 import * as serviceWorker from './serviceWorker';
 import { BrowserRouter } from 'react-router-dom';
 import ReactGA from 'react-ga4';
