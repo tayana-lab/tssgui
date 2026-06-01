@@ -1,5 +1,4 @@
 import React from 'react';
-import '@modules/common/default/scss/TssCommonCss.scss';
 
 const TssCircularProgressBar = ({ size = 40, strokeWidth = 5, progress = 0, color = "#4caf50", bgColor = "#e6e6e6" }) => {
   const center = size / 2;

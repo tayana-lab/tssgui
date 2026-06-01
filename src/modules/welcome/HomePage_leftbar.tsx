@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
 import { SidebarSearch } from '@app/modules/common/default/components/TssSidebarSearch';
 import HomePage_leftMenuItem from '@app/modules/welcome/HomePage_leftMenuItem';
 import tssguiConf from '@app/modules/conf/TssGui.json';
