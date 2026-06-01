@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleSidebarMenu, setWindowSize } from '@app/modules/common/default/store/reducers/ui';
@@ -49,56 +49,63 @@ const Main = () => {
     return () => window.removeEventListener('resize', onResize);
   }, [dispatch]);
 
+  /*
+   * LAYOUT STRATEGY
+   * ---------------
+   * The topbar (.tss-topbar) is position:fixed — out of normal flow.
+   * The sidebar (.tss-sidebar) is also position:fixed — out of normal flow.
+   *
+   * Therefore the <main> element must NOT be inside a flex row with the
+   * sidebar (that only works when the sidebar is in-flow). Instead we
+   * offset <main> with margin-left matching the current sidebar width,
+   * and pad the top to clear the fixed topbar.
+   *
+   * Transitions on margin-left give the smooth sidebar-collapse animation.
+   */
+  const sidebarWidth = menuSidebarCollapsed
+    ? 'var(--sidebar-width-sm)'
+    : 'var(--sidebar-width)';
+
   return (
     <>
-      {/* ── Fixed top navigation bar (out of normal flow) ── */}
+      {/* ── Fixed top navigation bar ── */}
       <Header />
 
+      {/* ── Fixed left sidebar ── */}
+      <HomePage_leftbar />
+
       {/*
-       * Body zone: sits below the fixed topbar.
-       * height = 100vh minus the topbar so it fills the remaining screen.
-       * flex-row lets sidebar and content sit side by side.
+       * ── Main content area ──
+       * padding-top clears the fixed topbar.
+       * margin-left clears the fixed sidebar.
+       * Both transition smoothly when sidebar collapses.
        */}
-      <div
-        className="flex overflow-hidden"
+      <main
+        id="rightSectionDiv"
         style={{
-          height:    'calc(100vh - var(--topbar-height))',
-          marginTop: 'var(--topbar-height)',
+          paddingTop:  'var(--topbar-height)',
+          marginLeft:  sidebarWidth,
+          minHeight:   '100vh',
+          transition:  'margin-left var(--transition)',
+          backgroundColor: 'var(--color-bg)',
+          display:     'flex',
+          flexDirection: 'column',
         }}
       >
-        {/* ── Collapsible left sidebar ── */}
-        <HomePage_leftbar />
+        {/* Breadcrumb / page-title bar */}
+        <TssContentHeader />
 
-        {/*
-         * Main content column.
-         * margin-left matches the sidebar width so content never slides
-         * under the sidebar. Transition keeps it smooth on collapse.
-         */}
-        <main
-          id="rightSectionDiv"
-          className="flex flex-col flex-1 overflow-hidden transition-all duration-200"
-          style={{
-            marginLeft: menuSidebarCollapsed
-              ? 'var(--sidebar-width-sm)'
-              : 'var(--sidebar-width)',
-            backgroundColor: 'var(--color-bg)',
-          }}
+        {/* Scrollable page content */}
+        <div
+          className="tss-content-body flex-1"
+          style={{ backgroundColor: 'var(--color-bg)' }}
         >
-          {/* Breadcrumb / page-title bar */}
-          <TssContentHeader />
+          <Outlet />
+        </div>
 
-          {/* Scrollable page content */}
-          <div
-            className="flex-1 overflow-y-auto tss-content-body"
-            style={{ backgroundColor: 'var(--color-bg)' }}
-          >
-            <Outlet />
-          </div>
-
-          {/* Footer */}
-          <Footer />
-        </main>
-      </div>
+        {/* Footer */}
+        <Footer />
+      </main>
 
       {/* ── Mobile sidebar backdrop ── */}
       {!menuSidebarCollapsed && (
