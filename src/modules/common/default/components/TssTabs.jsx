@@ -1,43 +1,58 @@
-import React,{useState,useRef,useEffect} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-const TssTabs = ({ tabsList = [] , defaultTab }) => {
+import React, { useState } from 'react';
 
-	const [activeTab, setActiveTab] = useState(defaultTab || (tabsList.length > 0 ? tabsList[0].Name : ''));
+/**
+ * TssTabs — horizontal tab bar with content panel.
+ * Replaces Bootstrap .nav-tabs + .tab-content pattern.
+ *
+ * Props
+ * -----
+ * tabsList    – Array of { Name: string, Component: ReactNode }
+ * defaultTab  – Name of the initially active tab
+ */
+const TssTabs = ({ tabsList = [], defaultTab }) => {
+  const [activeTab, setActiveTab] = useState(
+    defaultTab || (tabsList.length > 0 ? tabsList[0].Name : '')
+  );
 
-        const handleTssTabClick = (tabName) => {
-                setActiveTab(tabName);
-		localStorage.setItem('activeTab', tabName);	
-        };
+  const handleTabClick = (tabName) => {
+    setActiveTab(tabName);
+    localStorage.setItem('activeTab', tabName);
+  };
 
-	const tabListItems = tabsList.map((tab, index) => (
-			
-    		<li key={index} className="nav-item" >
-        	  <a
-			className={`nav-link tss-tab-link  ${activeTab === tab.Name ? 'active active-tab' : ''} `} 
-          		title ={tab.Name}
-          		onClick={() => handleTssTabClick(tab.Name)}
-        	  >
-           		{tab.Name}
-        	  </a>
-    		</li>
-	));
+  const selectedTabComponent = tabsList.find((tab) => tab.Name === activeTab)?.Component;
 
-
-	const selectedTabComponent = tabsList.find(tab => tab.Name === activeTab)?.Component;
-	const darkMode = useSelector((state) => state.ui.darkMode);
   return (
-	<>
-		<ul className='nav nav-tabs tss-tabs' role="tablist" style={{backgroundColor:"white"}}>	
-			{tabListItems}	
-			
-	  	</ul>
-	  	
-	   <div className="tss-tab-body">
-                {selectedTabComponent}
-            </div>
-	</>
+    <div>
+      {/* ---- Tab navigation bar ---- */}
+      <div className="tss-tabs-nav" role="tablist">
+        {tabsList.map((tab, index) => (
+          <button
+            key={index}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.Name}
+            aria-controls={`tabpanel-${tab.Name}`}
+            id={`tab-${tab.Name}`}
+            className={`tss-tab-btn ${activeTab === tab.Name ? 'active' : ''}`}
+            title={tab.Name}
+            onClick={() => handleTabClick(tab.Name)}
+          >
+            {tab.Name}
+          </button>
+        ))}
+      </div>
+
+      {/* ---- Tab content ---- */}
+      <div
+        className="tss-tab-body"
+        role="tabpanel"
+        id={`tabpanel-${activeTab}`}
+        aria-labelledby={`tab-${activeTab}`}
+      >
+        {selectedTabComponent}
+      </div>
+    </div>
   );
 };
 
 export default TssTabs;
-

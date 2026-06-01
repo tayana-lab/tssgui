@@ -1,173 +1,170 @@
-import React, { useState, useEffect,useRef } from 'react';
-import { NavLink, useNavigate ,useLocation, Location } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation, Location } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { IMenuItem } from '@app/modules/welcome/HomePage_leftbar';
-import '@app/modules/welcome/HomePage_topnav'
-//import ReactDOM from 'react-dom';
-//import { BrowserRouter as Router } from 'react-router-dom'; 
-import { useSelector } from 'react-redux';
-import config  from '@modules/conf/TssGui.json';
+import config from '@modules/conf/TssGui.json';
 
-const HomePage_leftMenuItem = ({ menuItem, level = 0, moduleName,isSidebarHovered = false,
-  menuSidebarCollapsed = false, }: { menuItem: IMenuItem; level?: number; moduleName:string; isSidebarHovered?: boolean;
-  menuSidebarCollapsed?: boolean;}) => {
-  const [t] = useTranslation();
-  const [isMenuExtended, setIsMenuExtended] = useState(level === 0);
-  const [isMainActive, setIsMainActive] = useState(false);
-  const [isOneOfChildrenActive, setIsOneOfChildrenActive] = useState(false);
-  const [selectedMenuItem, setSelectedMenuItem] = useState('');
-  const location = useLocation();
-  const navigate = useNavigate();
-  //const menuSidebarCollapsed = useSelector((state: any) => state.ui.menuSidebarCollapsed);
-  const firstRenderRef = useRef(true);
+interface MenuItemProps {
+  menuItem: IMenuItem;
+  level?: number;
+  moduleName: string;
+  isSidebarHovered?: boolean;
+  menuSidebarCollapsed?: boolean;
+}
 
-  const toggleMenu = () => {
-    setIsMenuExtended(!isMenuExtended);
-  };
-
-  const handleMainMenuAction = async () => { 
-	  if (menuItem.submodules && menuItem.submodules.length > 0) {
-		  toggleMenu();
-	  } else {
-		  navigate(menuItem.modulePage ? menuItem.modulePage : '/');
-		  setSelectedMenuItem(moduleName);
-		  localStorage.setItem("module" , moduleName);
-		 // localStorage.setItem("modulePath",menuItem.modulePage);
-		  localStorage.setItem("moduleVersionType", menuItem.versionType?menuItem.versionType:'0');
-		  localStorage.setItem("modulePath", menuItem.modulePathHierarchy?menuItem.modulePathHierarchy:'');
-		  localStorage.setItem("moduleHeading", menuItem.moduleHeading?menuItem.moduleHeading:'');
-                  localStorage.setItem("manual",menuItem.helpText?menuItem.helpText:'');
-	  }
-  };
-
+/* ---- Recursive helper: is any child/descendant the active page? ---- */
 const hasActiveChild = (submodules: IMenuItem[] | undefined, pathname: string): boolean => {
   if (!submodules) return false;
-
-  return submodules.some((child) => {
-    if (child.modulePage === pathname) {
-      return true;
-    }
-    return hasActiveChild(child.submodules, pathname);
-  });
+  return submodules.some(
+    (child) => child.modulePage === pathname || hasActiveChild(child.submodules, pathname)
+  );
 };
 
+const HomePage_leftMenuItem: React.FC<MenuItemProps> = ({
+  menuItem,
+  level = 0,
+  moduleName,
+  isSidebarHovered = false,
+  menuSidebarCollapsed = false,
+}) => {
+  const [t] = useTranslation();
+  const location  = useLocation();
+  const navigate  = useNavigate();
 
-  const calculateIsActive = (url: Location, item: IMenuItem) => {
-    setIsMainActive(false);
-    setIsOneOfChildrenActive(false);
+  const [isMenuExtended,        setIsMenuExtended]        = useState(level === 0);
+  const [isMainActive,          setIsMainActive]          = useState(false);
+  const [isOneOfChildrenActive, setIsOneOfChildrenActive] = useState(false);
+  const [selectedMenuItem,      setSelectedMenuItem]      = useState('');
 
-    if (item.modulePage === url.pathname) {
-      setIsMainActive(true);
-    } else if (item.submodules) {
-	    const isChildActive = hasActiveChild(item.submodules, url.pathname);
-	    if (isChildActive) {
-		    setIsOneOfChildrenActive(true);
-		    setIsMenuExtended(true);
-	    }
+  const firstRenderRef = useRef(true);
+
+  const hasChildren = menuItem.submodules && menuItem.submodules.length > 0;
+
+  /* ---- Sidebar expanded = not collapsed OR mouse is hovering ---- */
+  const shouldShowExpanded = !menuSidebarCollapsed || isSidebarHovered;
+
+  /* ---- Handle click: toggle submenu or navigate ---- */
+  const handleMainMenuAction = () => {
+    if (hasChildren) {
+      setIsMenuExtended((prev) => !prev);
+    } else {
+      navigate(menuItem.modulePage ?? '/');
+      setSelectedMenuItem(moduleName);
+      localStorage.setItem('module',            moduleName);
+      localStorage.setItem('moduleVersionType', menuItem.versionType         ?? '0');
+      localStorage.setItem('modulePath',        menuItem.modulePathHierarchy ?? '');
+      localStorage.setItem('moduleHeading',     menuItem.moduleHeading       ?? '');
+      localStorage.setItem('manual',            menuItem.helpText            ?? '');
     }
   };
 
+  /* ---- Active state from location ---- */
   useEffect(() => {
-    if (location) {
-      calculateIsActive(location, menuItem);
+    if (!location) return;
+    setIsMainActive(menuItem.modulePage === location.pathname);
+    setIsOneOfChildrenActive(hasActiveChild(menuItem.submodules, location.pathname));
+    if (hasActiveChild(menuItem.submodules, location.pathname)) {
+      setIsMenuExtended(true);
     }
   }, [location, menuItem]);
 
-
-const shouldShowExpanded = !menuSidebarCollapsed || isSidebarHovered;
-
-useEffect(() => {
-if (config.PRODUCT_ID != 0){
-
- if (!isMainActive && !isOneOfChildrenActive) {
-      setIsMenuExtended(false);
-    }
-
-}else{
-    if (!firstRenderRef.current) {
-      if (!isMainActive && !isOneOfChildrenActive && level !== 0) {
+  /* ---- Auto-collapse when not active (PRODUCT_ID != 0 only) ---- */
+  useEffect(() => {
+    if (config.PRODUCT_ID !== 0) {
+      if (!isMainActive && !isOneOfChildrenActive) {
         setIsMenuExtended(false);
       }
     } else {
-      firstRenderRef.current = false;
+      if (!firstRenderRef.current) {
+        if (!isMainActive && !isOneOfChildrenActive && level !== 0) {
+          setIsMenuExtended(false);
+        }
+      } else {
+        firstRenderRef.current = false;
+      }
     }
-
-}
   }, [isMainActive, isOneOfChildrenActive, level]);
 
+  /* ---- Collapsed sidebar: show only icon + short name ---- */
+  const collapsed = menuSidebarCollapsed && !isSidebarHovered;
+  const label     = collapsed && menuItem.shortModuleName
+    ? menuItem.shortModuleName
+    : menuItem.moduleName;
 
-
-
+  /* ---- Combined active flag ---- */
+  const isActive = isMainActive || isOneOfChildrenActive;
 
   return (
-    <>
-    {/* <Header module={selectedMenuItem}/>
-    <li className={`tss-menu-nav-item nav-item${isMenuExtended ? ' menu-open' : ''}`} style={{ marginLeft: `${level * 10}px` }} >
-    */}
-{config.PRODUCT_ID != 0 ? (
-<li
-      className={`tss-menu-nav-item nav-item${isMenuExtended ? ' menu-open' : ''}`}
+    <li
       style={{ position: 'relative' }}
+      role="none"
     >
+      {/* ---- Menu item row ---- */}
       <a
-        className={`tss-menu-item nav-link${isMainActive || isOneOfChildrenActive ? ' active' : ''}`}
-        role="link"
+        role="menuitem"
+        tabIndex={0}
         onClick={handleMainMenuAction}
+        onKeyDown={(e) => e.key === 'Enter' && handleMainMenuAction()}
+        className={[
+          'tss-menu-item',
+          isActive     ? 'active' : '',
+          isMenuExtended && hasChildren ? 'open' : '',
+        ].join(' ')}
         style={{
-          cursor: 'pointer',
-          padding: '9px',
-          display: 'flex',
-          flexDirection: menuSidebarCollapsed && !isSidebarHovered ? 'column' : 'row',
-          alignItems: 'center',
-          textAlign: menuSidebarCollapsed && !isSidebarHovered ? 'center' : 'left',
+          paddingLeft: collapsed ? undefined : `${12 + level * 14}px`,
+          flexDirection: collapsed ? 'column' : 'row',
+          alignItems:   'center',
+          textAlign:    collapsed ? 'center' : 'left',
+          gap:           collapsed ? '2px' : undefined,
         }}
+        title={menuItem.moduleName}
+        aria-expanded={hasChildren ? isMenuExtended : undefined}
+        aria-current={isMainActive ? 'page' : undefined}
       >
-        <div
-          style={{
-            display: 'flex',
-	    paddingLeft: `${level * 15}px`,
-            display: 'flex',
-            alignItems: 'center',      width: '100%',
-            flexDirection: menuSidebarCollapsed && !isSidebarHovered ? 'column' : 'row',
-            alignItems: 'center',
-          }}
-        >
-          <i
-            className={menuItem.moduleIcon || 'fa fa-angle-double-right'}
-            style={{
-              fontSize: '16px',
-              marginRight: !menuSidebarCollapsed || isSidebarHovered ? '8px' : '0',
-            }}
-          />
+        {/* Icon */}
+        <i
+          className={`tss-menu-icon ${menuItem.moduleIcon || 'fa fa-angle-double-right'}`}
+        />
+
+        {/* Label */}
+        {shouldShowExpanded && (
           <span
+            className="tss-menu-label"
             style={{
-              fontSize: menuSidebarCollapsed && !isSidebarHovered ? '10px' : '',
-              marginTop: menuSidebarCollapsed && !isSidebarHovered ? '5px' : '0',
-              whiteSpace: menuSidebarCollapsed && !isSidebarHovered ? 'normal' : 'nowrap',
-              overflow: 'hidden',
-              maxWidth: menuSidebarCollapsed && !isSidebarHovered ? '50px' : 'none',
+              fontSize:  collapsed ? '9px'    : '13px',
+              maxWidth:  collapsed ? '48px'   : 'none',
+              whiteSpace: collapsed ? 'normal' : 'nowrap',
+              lineHeight: collapsed ? '1.2'   : undefined,
             }}
           >
-        	{menuSidebarCollapsed && !isSidebarHovered && menuItem.shortModuleName
-              ? menuItem.shortModuleName
-              : menuItem.moduleName}  
-	</span>
-        </div>
-
-	<p className="sidemenu" >
-        {shouldShowExpanded && menuItem.submodules?.length > 0 && (
-          <i className="right fas fa-angle-left"/>
+            {label}
+          </span>
         )}
-	</p>
+
+        {/* Chevron — only when expanded and has children */}
+        {shouldShowExpanded && hasChildren && (
+          <i
+            className={`tss-menu-chevron fas fa-angle-left ml-auto ${isMenuExtended ? 'open' : ''}`}
+            style={{ transform: isMenuExtended ? 'rotate(-90deg)' : 'none' }}
+          />
+        )}
       </a>
 
-      {shouldShowExpanded && isMenuExtended && menuItem.submodules && (
-        <ul className="tss-menu-nav-sidebar nav nav-treeview" >
-          {menuItem.submodules.map((childMenuItem, index) => (
+      {/* ---- Submenu (recursive) ---- */}
+      {shouldShowExpanded && isMenuExtended && hasChildren && (
+        <ul
+          className="list-none m-0 p-0"
+          role="menu"
+          style={{
+            borderLeft: `2px solid var(--color-border)`,
+            marginLeft: `${16 + level * 14}px`,
+            marginRight: '8px',
+          }}
+        >
+          {menuItem.submodules!.map((child, index) => (
             <HomePage_leftMenuItem
               key={index}
-	     style={{ paddingLeft: '10px' }}
-              menuItem={childMenuItem}
+              menuItem={child}
               level={level + 1}
               moduleName={selectedMenuItem}
               isSidebarHovered={isSidebarHovered}
@@ -177,87 +174,7 @@ if (config.PRODUCT_ID != 0){
         </ul>
       )}
     </li>
-):
-(
-<li
-      className={`tss-menu-nav-item nav-item${(isMenuExtended || level === 0) ? ' menu-open' : ''}`}
-      style={{ position: 'relative' }}
-    >
-      <a
-        className={`tss-menu-item nav-link${isMainActive || isOneOfChildrenActive ? ' active' : ''}`}
-        role="link"
-        onClick={handleMainMenuAction}
-        style={{
-          cursor: 'pointer',
-          padding: '9px',
-          display: 'flex',
-          flexDirection: menuSidebarCollapsed && !isSidebarHovered ? 'column' : 'row',
-          alignItems: 'center',
-          textAlign: menuSidebarCollapsed && !isSidebarHovered ? 'center' : 'left',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            paddingLeft: `${level * 15}px`,
-            display: 'flex',
-            alignItems: 'center',      width: '100%',
-            flexDirection: menuSidebarCollapsed && !isSidebarHovered ? 'column' : 'row',
-            alignItems: 'center',
-          }}
-        >
-          <i
-            className={menuItem.moduleIcon || 'fa fa-angle-double-right'}
-            style={{
-              fontSize: '16px',
-              marginRight: !menuSidebarCollapsed || isSidebarHovered ? '8px' : '0',
-            }}
-          />
-          <span
-            style={{
-              fontSize: menuSidebarCollapsed && !isSidebarHovered ? '10px' : '',
-              marginTop: menuSidebarCollapsed && !isSidebarHovered ? '5px' : '0',
-              whiteSpace: menuSidebarCollapsed && !isSidebarHovered ? 'normal' : 'nowrap',
-              overflow: 'hidden',
-              maxWidth: menuSidebarCollapsed && !isSidebarHovered ? '50px' : 'none',
-            }}
-          >
-                {menuSidebarCollapsed && !isSidebarHovered && menuItem.moduleShortName
-              ? menuItem.moduleShortName
-              : menuItem.moduleName}
-        </span>
-        </div>
-
-        <p className="sidemenu" >
-        {shouldShowExpanded && menuItem.submodules?.length > 0 && (
-          <i className="right fas fa-angle-left"/>
-        )}
-        </p>
-      </a>
-
-      {shouldShowExpanded && isMenuExtended && menuItem.submodules && (
-        <ul className="tss-menu-nav-sidebar nav nav-treeview" >
-          {menuItem.submodules.map((childMenuItem, index) => (
-            <HomePage_leftMenuItem
-              key={index}
-             style={{ paddingLeft: '10px' }}
-              menuItem={childMenuItem}
-              level={level + 1}
-              moduleName={selectedMenuItem}
-              isSidebarHovered={isSidebarHovered}
-              menuSidebarCollapsed={menuSidebarCollapsed}
-            />
-          ))}
-        </ul>
-      )}
-    </li>
-
-
-)}
-
-    </>
   );
 };
 
 export default HomePage_leftMenuItem;
-

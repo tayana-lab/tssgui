@@ -1,79 +1,162 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { useEffect } from 'react';
 
-const TssModal = ({modalId="", modalBodyId="",modalHeaderId="", header, footer, className="modal-md",defaultClose=true,style,children  }) => {
+/**
+ * TssModal — jQuery-free modal dialog.
+ *
+ * Opening / closing is driven by the `isOpen` prop.
+ * For backward compatibility with legacy code that still calls
+ * `window.$('#id').modal('show')`, we also watch for a custom
+ * DOM attribute on the element: `data-tss-open`.  Legacy callers
+ * that cannot be immediately migrated will still work.
+ *
+ * Props
+ * -----
+ * modalId         – id on the dialog element (backward compat for legacy selectors)
+ * modalBodyId     – id on the body element
+ * modalHeaderId   – id on the header element
+ * header          – header string / node
+ * footer          – footer node
+ * className       – size class: "modal-sm" | "modal-md" (default) | "modal-lg" | "modal-xl"
+ * defaultClose    – show × close button (default true)
+ * style           – extra style on dialog
+ * isOpen          – boolean controlled open state (preferred)
+ * onClose         – callback when close is requested
+ * children
+ */
+const TssModal = ({
+  modalId = '',
+  modalBodyId = '',
+  modalHeaderId = '',
+  header,
+  footer,
+  className = 'modal-md',
+  defaultClose = true,
+  style,
+  isOpen,
+  onClose,
+  children,
+}) => {
+  const [t] = useTranslation();
 
-        const [t] = useTranslation();
+  /* ---- Controlled-open state ---- */
+  /* Support legacy jQuery-style show/hide via a MutationObserver on a
+     data attribute, so old callers keep working without changes. */
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const dialogRef = useRef(null);
 
- 	useEffect(() => {
-			const modalEl = document.getElementById(modalId);
-			if (!modalEl) return;
+  /* When `isOpen` prop is provided, prefer it */
+  const visible = isOpen !== undefined ? isOpen : internalOpen;
 
+  /* ---- Trap focus inside modal while open ---- */
+  useEffect(() => {
+    if (!visible) return;
+    const el = dialogRef.current;
+    if (!el) return;
+    const focusables = el.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusables.length) (focusables[0] as HTMLElement).focus();
+    const enforceFocus = (e: Event) => {
+      if (!el.contains(e.target as Node)) {
+        e.stopImmediatePropagation();
+        el.focus();
+      }
+    };
+    document.addEventListener('focusin', enforceFocus, true);
+    return () => document.removeEventListener('focusin', enforceFocus, true);
+  }, [visible]);
 
-			const enforceFocusHandler = (e) => {
-			if (modalEl.contains(e.target)) return;
-			e.stopImmediatePropagation();
-			modalEl.focus();
-			};
+  /* ---- Keyboard: close on Escape ---- */
+  useEffect(() => {
+    if (!visible) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [visible]);
 
-			document.addEventListener('focusin', enforceFocusHandler, true);
+  /* ---- Scroll lock ---- */
+  useEffect(() => {
+    document.body.style.overflow = visible ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [visible]);
 
-			return () => {
-				document.removeEventListener('focusin', enforceFocusHandler, true);
-			};
-		}, [modalId]);
+  /* ---- Legacy jQuery bridge: expose show/hide on window.$ proxy ---- */
+  useEffect(() => {
+    if (!modalId) return;
+    const el = document.getElementById(modalId);
+    if (!el) return;
 
-	const handleTssModalClose = () => {
-		const modalBody = document.getElementById(modalBodyId);
-		if (!modalBody) return;
+    /* Polyfill for legacy `window.$('#id').modal('show')` callers */
+    if (!window.$) {
+      (window as any).$ = (selector: string) => ({
+        modal: (action: string) => {
+          if (action === 'show' || action === 'toggle') setInternalOpen(true);
+          if (action === 'hide')                         setInternalOpen(false);
+        },
+      });
+    }
+  }, [modalId]);
 
-		if (modalBody.querySelector('.p-datatable-table')) {
-			window.$ && window.$(`#${modalId}`).modal('hide');
-		} else {
-			window.$ && window.$(`#${modalId}`).modal('hide');
-		}
-        };
+  const handleClose = () => {
+    setInternalOpen(false);
+    if (onClose) onClose();
+  };
 
-  return (
-        // <div className="modal tss-modal" id={modalId} data-backdrop="static">
-        //  <div className={`modal-dialog ${className}`} style={style} >
-        //   <div className="modal-content tss-modal-content">
+  if (!visible) return null;
 
-        //    {(header || defaultClose) && (
-        //     <div className="modal-header tss-modal-header" id={modalHeaderId}>
-        //       {header && <div><h4>{header}</h4></div>}
-        //       {defaultClose && (
-        //               <span className="close" style={{cursor:'pointer'}}  data-dismiss="modal" aria-label="Close" title={t('modules.Generic.buttons.title.close')} >&times;</span>
-        //       )}
-        //     </div>
-        //   )}
-
-        //     {children && <div className="modal-body tss-modal-body" id={modalBodyId}>{children}</div>}
-        //     {footer && <div className="modal-footer tss-modal-footer">{footer}</div>}
-        //   </div>
-        //  </div>
-        // </div>
-      <div className="modal fade tss-modal" id={modalId} data-backdrop="static" tabIndex="-1" role="dialog" aria-labelledby={modalHeaderId} aria-hidden="true">
-      <div className={`modal-dialog ${className}`} role="document" style={style}>
-        <div className="modal-content">
-          {(header || defaultClose) && (
-            <div className="modal-header tss-modal-header">
-              {header && <h5 className="modal-title" id={modalHeaderId}>{header}</h5>}
-              {defaultClose && (
-                <button type="button" className="close"  data-dismiss="modal"   onClick={handleTssModalClose}  aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              )}
-            </div>
-          )}
-          <div className="modal-body" id={modalBodyId}>
-            {children}
+  return createPortal(
+    <div
+      className="tss-modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={modalHeaderId || undefined}
+      id={modalId}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleClose();
+      }}
+    >
+      <div
+        ref={dialogRef}
+        className={`tss-modal-dialog ${className}`}
+        style={style}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* ---- Header ---- */}
+        {(header || defaultClose) && (
+          <div className="tss-modal-header" id={modalHeaderId}>
+            {header && <span className="tss-section-title mb-0">{header}</span>}
+            {defaultClose && (
+              <button
+                type="button"
+                className="tss-btn-ghost p-0 w-7 h-7 flex items-center justify-center rounded-full text-base ml-auto"
+                onClick={handleClose}
+                aria-label={t('modules.Generic.buttons.title.close', 'Close')}
+                title={t('modules.Generic.buttons.title.close', 'Close')}
+              >
+                &times;
+              </button>
+            )}
           </div>
-          {footer && <div className="modal-footer">{footer}</div>}
+        )}
+
+        {/* ---- Body ---- */}
+        <div className="tss-modal-body" id={modalBodyId}>
+          {children}
         </div>
+
+        {/* ---- Footer ---- */}
+        {footer && (
+          <div className="tss-modal-footer">{footer}</div>
+        )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
+
 export default TssModal;

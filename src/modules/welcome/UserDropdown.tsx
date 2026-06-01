@@ -1,35 +1,36 @@
-import { useState} from 'react';
-import { useNavigate} from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { setAuthentication } from '@app/modules/common/default/store/reducers/auth';
 import { GoogleProvider } from '@app/modules/common/default/utils/oidc-providers';
-import TssButton from '@app/modules/common/default/components/TssButton'; 
 import TssIcon from '@app/modules/common/default/components/TssIcon';
-
-import {
-  UserBody,
-  UserFooter,
-  UserHeader,
-  UserMenuDropdown,
-} from '@app/modules/common/default/components/TssDropDownMenus';
-
-
 
 declare const FB: any;
 
 const UserDropdown = () => {
-  const navigate = useNavigate();
-  const [t] = useTranslation();
-  const dispatch = useDispatch();
+  const navigate      = useNavigate();
+  const [t]           = useTranslation();
+  const dispatch      = useDispatch();
   const authentication = useSelector((state: any) => state.auth.authentication);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const darkMode = useSelector((state) => state.ui.darkMode);
-  const logOut = async (event: any) => {
-    //event.preventDefault();
-    setDropdownOpen(false);
-  //  console.log('authentication', authentication);
+  const [open, setOpen]   = useState(false);
+  const wrapperRef         = useRef<HTMLDivElement>(null);
+
+  /* ---- Close on outside click ---- */
+  useEffect(() => {
+    const onOutside = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
+  }, []);
+
+  /* ---- Sign out ---- */
+  const logOut = async () => {
+    setOpen(false);
     if (authentication.profile.first_name) {
       await GoogleProvider.signoutPopup();
       dispatch(setAuthentication(undefined));
@@ -46,74 +47,93 @@ const UserDropdown = () => {
     localStorage.removeItem('authentication');
   };
 
-  const navigateToProfile = (event: any) => {
-    // event.preventDefault();
-    setDropdownOpen(false);
-    localStorage.setItem("modulePath","");
-    localStorage.setItem("moduleVersionType","0");
-    localStorage.setItem("moduleHeading","Profile");
+  const navigateToProfile = () => {
+    setOpen(false);
+    localStorage.setItem('modulePath', '');
+    localStorage.setItem('moduleVersionType', '0');
+    localStorage.setItem('moduleHeading', 'Profile');
     navigate('/profile');
-
   };
 
+  const email = authentication?.profile?.email ?? '';
+
   return (
-  	 <UserMenuDropdown 
-      isOpen={dropdownOpen}
-      hideArrow
-      onMouseEnter={() => setDropdownOpen(true)}  
-      onMouseLeave={() => setDropdownOpen(false)} 
-    >
-      <div slot="head" className="tss-icon mt-1" style={{ cursor: 'pointer', }}> 
-        <span  style={{ display: 'flex', gap: '0.4rem' }}>
-          <TssIcon
-            className="ml-2"
-            iconKey="tss_user"
-            iconProps={{ style: { fontSize: '1.2rem' } }}
-            title={t('topnavi.title.profile')}
-          />
-          <span className="mr-2" style={{ marginTop: '-2px' }}>{authentication.profile.email}</span>
+    <div ref={wrapperRef} className="relative">
+
+      {/* ---- Trigger chip ---- */}
+      <button
+        type="button"
+        className="tss-user-chip"
+        onClick={() => setOpen((prev) => !prev)}
+        onMouseEnter={() => setOpen(true)}
+        title={t('topnavi.title.profile')}
+        aria-haspopup="true"
+        aria-expanded={open}
+      >
+        <TssIcon iconKey="tss_user" iconProps={{ style: { fontSize: '1.1rem' } }} />
+        <span className="zoom-hide-text text-xs max-w-[140px] truncate hidden sm:inline">
+          {email}
         </span>
-      </div>
+      </button>
 
-      <div slot="body" style={{ backgroundColor: '#fafafa', marginTop: '-12px', }}>
+      {/* ---- Dropdown panel ---- */}
+      {open && (
+        <div
+          className="tss-dropdown absolute right-0 top-full mt-1"
+          style={{ minWidth: '220px' }}
+          onMouseLeave={() => setOpen(false)}
+        >
+          {/* Header */}
+          <div
+            className="flex flex-col items-center px-4 py-4"
+            style={{
+              background: 'linear-gradient(135deg, #ffffff 0%, #c4b0f3 100%)',
+              borderRadius: '0',
+            }}
+          >
+            <img
+              src="/images/user.svg"
+              alt="User profile"
+              className="rounded-full mb-2"
+              style={{
+                width: '52px',
+                height: '52px',
+                border: '2px solid rgba(255,255,255,0.5)',
+                backgroundColor: '#fafafa',
+              }}
+            />
+            <p className="text-sm font-semibold text-center" style={{ color: '#2D3748' }}>
+              {email}
+            </p>
+          </div>
 
-        <UserHeader>
-          <img
-            src="/images/user.svg"
-            alt="User profile"
-            className="profile-user-img img-fluid img-circle"
-            style={{ height: '60px', width: '60px', backgroundColor: '#fafafa', paddingTop: '5px' }}
-          />
-          <p className="tssheading">{authentication.profile.email}</p>
-        </UserHeader>
+          <div className="tss-dropdown-divider m-0" />
 
-        <UserFooter>
+          {/* Profile link */}
           <button
             type="button"
-            className="btn-userDropDown"
+            className="tss-dropdown-item w-full text-left"
             onClick={navigateToProfile}
-            style={{ cursor: 'pointer' }}
           >
-            <TssIcon iconKey="tss_profile" className="icon-left" />
-            &nbsp;&nbsp;{t('topnavi.user.profile')}
+            <TssIcon iconKey="tss_profile" />
+            {t('topnavi.user.profile')}
           </button>
 
-          <br />
+          <div className="tss-dropdown-divider" />
 
+          {/* Sign out */}
           <button
             type="button"
-            className="btn-userDropDown"
+            className="tss-dropdown-item w-full text-left"
             onClick={logOut}
-            style={{ cursor: 'pointer' }}
           >
-           <TssIcon iconKey="tss_signout" className="icon-left" />
-            &nbsp;&nbsp;{t('login.button.signOut')}
+            <TssIcon iconKey="tss_signout" />
+            {t('login.button.signOut')}
           </button>
-        </UserFooter>
-      </div>
-    </UserMenuDropdown>
-
-	);
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default UserDropdown;
