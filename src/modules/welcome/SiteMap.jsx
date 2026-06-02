@@ -145,7 +145,7 @@ const SiteMap = () => {
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-primary-light)' }}>
                   <i className="fas fa-inbox text-2xl" style={{ color: 'var(--color-primary)' }} />
                 </div>
-                <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-muted)', fontFamily: 'Gilroy-Bold, sans-serif' }}>
+                <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>
                   No Products Available
                 </h3>
                 <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
@@ -177,7 +177,7 @@ const SiteMap = () => {
                       >
                         {/* Card Header with Product Name */}
                         <div className="tss-card-header border-b">
-                          <h3 className="font-bold text-center w-full" style={{ color: '#034694', fontFamily: 'Gilroy-Bold, sans-serif' }}>
+                          <h3 className="font-bold text-center w-full" style={{ color: '#034694', fontWeight: 700 }}>
                             {aliasLabelMap[product.productName] || product.productName}
                           </h3>
                         </div>

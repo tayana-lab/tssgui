@@ -24,7 +24,7 @@
 /* 25 YEAR Of Excellence */
 .logo-text {
     position: absolute;
-    font-family: 'Gilroy' !important;
+    font-weight: 500;
     font-size: 10px;
     line-height: 12px;
     letter-spacing: 0.26em;
@@ -33,7 +33,6 @@
 
 /* Login Screen Footer */
 .login-screen-footer {
-    font-family: 'Gilroy' !important;
     font-weight: 600;
     font-size: 14px;
     line-height: 19px;

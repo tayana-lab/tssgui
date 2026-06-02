@@ -115,7 +115,7 @@ const Header = () => {
         <div className="hidden sm:block">
           <h1
             className="text-sm font-bold leading-none select-none"
-            style={{ color: 'var(--color-primary)', fontFamily: 'Gilroy-Bold, sans-serif' }}
+            style={{ color: 'var(--color-primary)', fontWeight: 700 }}
           >
             {productTitle}
           </h1>

@@ -1,24 +1,11 @@
 /* ====================================================
    Tailwind base directives
    ==================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* ====================================================
-   Custom fonts
-   ==================================================== */
-@font-face {
-  font-family: 'Gilroy-Bold';
-  src: url('@modules/common/default/fonts/Gilroy-Bold.ttf') format('truetype');
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Gilroy';
-  src: url('@modules/common/default/fonts/Gilroy-Medium.ttf') format('truetype');
-  font-display: swap;
-}
 
 /* ====================================================
    CSS design tokens — light mode
@@ -194,9 +181,10 @@ html {
 }
 
 body {
-  font-family: 'Gilroy', Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   background-color: var(--color-bg);
   color: var(--color-text);
+  font-weight: 400;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -314,6 +302,7 @@ body {
     position: relative;
     border-left: 3px solid transparent;
     padding-left: calc(0.75rem - 3px);
+    font-weight: 500;
   }
   .tss-menu-item:hover {
     background-color: var(--color-sidebar-hover);
@@ -419,6 +408,7 @@ body {
     background-color: var(--color-card-header);
     border-bottom: 1px solid var(--color-card-border);
     color: var(--color-text);
+    font-weight: 600;
   }
   .tss-card-header.no-collapse {
     cursor: default;
@@ -578,6 +568,7 @@ body {
     background-color: var(--color-table-header);
     color: var(--color-text-muted);
     border-bottom: 1px solid var(--color-table-border);
+    font-weight: 600;
   }
   .tss-table td {
     @apply px-4 py-3 text-sm;
@@ -618,7 +609,8 @@ body {
   .tss-page-title {
     @apply text-xl font-bold;
     color: var(--color-text);
-    font-family: 'Gilroy-Bold', sans-serif;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
     letter-spacing: -0.3px;
   }
 

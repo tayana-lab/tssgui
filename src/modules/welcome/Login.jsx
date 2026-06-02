@@ -496,7 +496,7 @@ const Login = () => {
                   <img src="/images/image.svg" alt="logo" style={{ maxWidth: '60px' }} />
                   <h2
                     className="text-xl font-bold"
-                    style={{ color: '#347DC1', fontFamily: 'Gilroy-Bold, sans-serif' }}
+                    style={{ color: '#347DC1', fontWeight: 700 }}
                   >
                     {config.PRODUCT_NAME}
                   </h2>
@@ -508,7 +508,7 @@ const Login = () => {
                 {showMfaScreen ? (
                   <form onSubmit={handleMfaVerify} className="mt-4">
                     <div className="text-center mb-4">
-                      <h5 className="font-bold" style={{ color: '#347DC1', fontFamily: 'Gilroy-Bold, sans-serif' }}>
+                      <h5 className="font-bold" style={{ color: '#347DC1', fontWeight: 700 }}>
                         Two-Factor Authentication
                       </h5>
                       <p className="text-xs mt-1" style={{ color: 'var(--color-text-muted)' }}>
@@ -573,7 +573,6 @@ const Login = () => {
                             className="relative text-xs pb-2 cursor-pointer bg-transparent border-0 outline-none"
                             style={{
                               color:      '#000',
-                              fontFamily: 'Gilroy, sans-serif',
                               fontWeight: loginType === id ? 700 : 400,
                             }}
                             onClick={() => handleLoginTypeChange(id)}
@@ -616,7 +615,7 @@ const Login = () => {
                             </button>
                           )}
                         </div>
-                        <div className="flex items-center justify-between text-xs" style={{ color: '#6B7A99', fontFamily: 'Gilroy, sans-serif' }}>
+                        <div className="flex items-center justify-between text-xs" style={{ color: '#6B7A99', fontWeight: 400 }}>
                           <label className="flex items-center gap-1.5 cursor-pointer">
                             <input type="checkbox" className="rounded" />
                             Remember Me

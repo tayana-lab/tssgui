@@ -66,7 +66,7 @@ const Dashboard = () => {
           </div>
           <h3
             className="text-base font-semibold"
-            style={{ color: 'var(--color-text-muted)', fontFamily: 'Gilroy-Bold, sans-serif' }}
+            style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}
           >
             Dashboard is in Progress...
           </h3>

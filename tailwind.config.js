@@ -53,8 +53,7 @@ export default {
         },
       },
       fontFamily: {
-        sans:  ['Gilroy', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        bold:  ['Gilroy-Bold', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans:  ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
         mono:  ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       spacing: {
