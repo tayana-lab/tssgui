@@ -6,21 +6,21 @@ import productFeatures from '@app/modules/conf/Products.json';
 const Panel = ({ module, submodules, onModuleClick, onItemClick }) => {
   const renderSubmodules = (submodules) => {
     return (
-      <ul className="list-unstyled pl-3">
+      <ul className="list-none space-y-2">
         {submodules.map((submodule) => {
-          const icon = submodule.moduleIcon || 'fa fa-share'; // Default icon
+          const icon = submodule.moduleIcon || 'fa fa-share';
           return (
-            <li key={submodule.moduleId} className="mb-2">
+            <li key={submodule.moduleId}>
               <a
                 href="javascript:void(0);"
                 onClick={() => onItemClick(submodule)}
-                className="tss-paragraph"
+                className="flex items-center gap-2 text-sm p-1 rounded hover:bg-gray-100 hover:text-blue-600 transition-colors"
               >
-                <i className={`fa ${icon}`} style={{ width: '15px' }}></i>&nbsp;&nbsp;
-                {submodule.moduleHeading}
+                <i className={`fa ${icon}`} style={{ width: '15px', fontSize: '12px' }}></i>
+                <span className="truncate">{submodule.moduleHeading}</span>
               </a>
               {submodule.submodules && submodule.submodules.length > 0 && (
-                <div className="pl-3">
+                <div className="pl-4">
                   {renderSubmodules(submodule.submodules)}
                 </div>
               )}
@@ -32,19 +32,14 @@ const Panel = ({ module, submodules, onModuleClick, onItemClick }) => {
   };
 
   return (
-<div className="col-md-3 col-sm-4 col-xs-12 mb-3 d-flex">
-  <div className={`card flex-grow-1 d-flex flex-column ${submodules.length / 10 < 6 ? 'short-card' : ''}`}>
-        
-<div className="card-header" style={{ background: "#c4b0f3" }} id="sitemap-header">
-          <h5 className="card-title">
-            <a href="javascript:void(0);" id={module.moduleId} className="tss-paragraph">
-              <b>{module.moduleHeading}</b>
-            </a>
-          </h5>
-        </div>
-        <div className="card-body" style={{padding: "1px",paddingTop: "12px"}} >
-          {renderSubmodules(submodules)}
-        </div>
+    <div className="tss-card">
+      <div className="tss-card-header" style={{ background: "#c4b0f3", color: "#fff" }}>
+        <a href="javascript:void(0);" id={module.moduleId} className="font-semibold">
+          {module.moduleHeading}
+        </a>
+      </div>
+      <div className="tss-card-body">
+        {renderSubmodules(submodules)}
       </div>
     </div>
   );
@@ -66,7 +61,7 @@ const SiteMap = () => {
         const parsedData = JSON.parse(modulesJSON);
         setModules(parsedData);
       } catch (error) {
-       // console.error('Error parsing localStorage data:', error);
+        // Error parsing data
       }
     }
   }, []);
@@ -93,10 +88,9 @@ const SiteMap = () => {
           throw new Error('Failed to fetch product details');
         }
         const data = await response.json();
-	  //    console.log(data);
         setProductDetails(data);
       } catch (error) {
-       // console.log("Error", error);
+        // Error fetching product details
       }
     };
 
@@ -104,8 +98,7 @@ const SiteMap = () => {
   }, []);
 
   const handleRedirect = async (Url, productId) => {
-
-   var productUrl="";
+    let productUrl = "";
     try {
       const response = await fetch(`${TssConf.SERVER_JS_API_URI}/generateToken`, {
         method: 'POST',
@@ -120,201 +113,135 @@ const SiteMap = () => {
       }
       const data = await response.json();
       const { token } = data;
+      
+      productUrl = `${Url}?token=${token}`;
      
-	  productUrl = `${Url}?token=${token}`;
-     
-    if (productId == 70 || productId == 90) {
-	  productUrl = `${Url}`;  
-         window.open(productUrl, '_blank');
-      }else{
-	 productUrl = `${Url}?token=${token}`;
-         window.location.href = productUrl;
+      if (productId == 70 || productId == 90) {
+        productUrl = `${Url}`;  
+        window.open(productUrl, '_blank');
+      } else {
+        productUrl = `${Url}?token=${token}`;
+        window.location.href = productUrl;
       }
-
     } catch (error) {
-    //  console.error('Error during authentication', error);
+      // Error during authentication
     }
   };
-const desiredOrder = [0,50, 10, 20, 60, 70, 80,90,100];
 
-const aliasLabelMap = {
-  BMP: "Bulk Messaging",
-  Monitoring: "AMS",
-  Analytics: "Advanced Analytics",
-  MCA: "Call Mgt Services"	
-};
-
+  const aliasLabelMap = {
+    BMP: "Bulk Messaging",
+    Monitoring: "AMS",
+    Analytics: "Advanced Analytics",
+    MCA: "Call Mgt Services"	
+  };
 
   return (
-  
-	  <div>
-  {TssConf.PRODUCT_ID == '0' ? (
-<div className="container mt-4">
-  <div
-    className="row"
-    style={{
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: '1rem',
-    }}
-  >
-    {productDetails.length == 0 ? (
-      <div className="col-12" style={{ textAlign: "center" }}>
-        <h5 className="text-muted">No Products Available</h5>
-      </div>
-    ) : (
-          productDetails
-  .filter(product =>  product.productId !== TssConf.PRODUCT_ID)
-  .map(product => {
-
-          const isDisabled = product.status == 0;
-
-          return (
-            <div
-              key={product.productId}
-              className="d-flex justify-content-center"
-              style={{
-                flexBasis: 'calc(25% - 1rem)',
-                maxWidth: 'calc(25% - 1rem)',
-                marginBottom: '1rem',
-              }}
-            >
-              <div
-                className="card shadow-lg p-3 d-flex flex-column"
-                 onClick={!isDisabled ? () => handleRedirect(product.productUrl, product.productId) : undefined}
-                 style={{
-                  width: '100%',
-                  borderRadius: '30px',
-                  overflow: 'hidden',
-                  transition: 'transform 0.3s ease, opacity 1s ease',
-                                cursor: isDisabled ? 'not-allowed' : 'pointer',
-                  pointerEvents: isDisabled ? 'none' : 'auto',
-                  opacity: isDisabled ? 0.5 : 1,
-
-                }}
-
-                onMouseEnter={(e) => {
-                        setHoveredProductId(product.productId)
-			if (!isDisabled) e.currentTarget.style.transform = "scale(1.05)";
-                }}
-                onMouseLeave={(e) => {
-			setHoveredProductId(null)
-                  if (!isDisabled) e.currentTarget.style.transform = "scale(1)";
-                }}
-
-              >
-        <div className="d-flex align-items-center justify-content-center mb-3">
-                  <h5 className="fw-bold mb-0" style={{color:"#034694"}}>{aliasLabelMap[product.productName] || product.productName}</h5>
+    <div>
+      {TssConf.PRODUCT_ID == '0' ? (
+        <div className="w-full">
+          {productDetails.length == 0 ? (
+            <div className="flex items-center justify-center py-24">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-primary-light)' }}>
+                  <i className="fas fa-inbox text-2xl" style={{ color: 'var(--color-primary)' }} />
                 </div>
-          
-   {hoveredProductId !== product.productId && (
-	   <>
-
-
-
-          <div className="d-flex align-self-center">
-            <img
-              src={`/images/${product.productName}.svg`}
-              alt={product.alias}
-              style={{
-                height: "140px",
-                width: "240px",
-                objectFit: "contain",
-                transition: 'opacity 3s ease', // Smooth opacity change
-              }}
-            />
-          </div>
-
-	      <div className="text-center mt-auto">
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ textDecoration: "none", color: "#6C6C6C" }}
-                  >
-                    More info <img src="/images/arrow.svg" alt="arrow" />
-                  </a>
-                </div>
-</>
-        )}
-
-{hoveredProductId == product.productId && (
-  <div
-    className="salient-features"
-    style={{
-      position: 'absolute',
-      top: '70%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      color: '#003e5c',
-      borderRadius: '10px',
-      display: 'flex',
-      flexDirection: 'column',
-      textAlign: 'left',
-      width: '100%',
-      height: '100%',
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-      overflow: 'hidden',
-		    
-    }}
-  >
-
-<ul
-      style={{
-        listStyleType: 'disc',
-        margin: 0,
-      }}
-    >
-
-
-    {(productFeatures[product.productId] || []).map((feature, index) => (
-    
-<li
-          key={index}
-          style={{
-            marginBottom: '0px', // space between list items
-            fontWeight: 500,
-            fontSize: '15px',
-             color: '#034694',			  
-            opacity: hoveredProductId === product.productId ? 1 : 0,
-            transform: hoveredProductId === product.productId ? 'translateY(0)' : 'translateY(10px)',
-          }}
-        >
-          {feature}
-        </li>
-    ))}
-	</ul>
-  </div>
-)}
-
+                <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-muted)', fontFamily: 'Gilroy-Bold, sans-serif' }}>
+                  No Products Available
+                </h3>
+                <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                  Your product catalog will appear here once configured.
+                </p>
               </div>
             </div>
-    );
-        })
-    )}
-  </div>
-</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {productDetails
+                .filter(product => product.productId !== TssConf.PRODUCT_ID)
+                .map(product => {
+                  const isDisabled = product.status == 0;
 
-  ) : (
-    <div className="row d-flex flex-wrap align-items-stretch">
-      {modules.map((module) => (
-        <Panel
-          key={module.moduleId}
-          module={module}
-          submodules={module.submodules || []}
-          onModuleClick={handleModuleClick}
-          onItemClick={handleItemClick}
-        />
-      ))}
+                  return (
+                    <div
+                      key={product.productId}
+                      className="group"
+                    >
+                      <div
+                        className="tss-card cursor-pointer flex flex-col h-full transition-all duration-200 hover:shadow-lg"
+                        onClick={!isDisabled ? () => handleRedirect(product.productUrl, product.productId) : undefined}
+                        style={{
+                          opacity: isDisabled ? 0.5 : 1,
+                          pointerEvents: isDisabled ? 'none' : 'auto',
+                        }}
+                        onMouseEnter={() => setHoveredProductId(product.productId)}
+                        onMouseLeave={() => setHoveredProductId(null)}
+                      >
+                        {/* Card Header with Product Name */}
+                        <div className="tss-card-header border-b">
+                          <h3 className="font-bold text-center w-full" style={{ color: '#034694', fontFamily: 'Gilroy-Bold, sans-serif' }}>
+                            {aliasLabelMap[product.productName] || product.productName}
+                          </h3>
+                        </div>
+
+                        {/* Card Body */}
+                        <div className="tss-card-body flex-1 flex flex-col items-center justify-center min-h-48 relative overflow-hidden">
+                          {hoveredProductId !== product.productId ? (
+                            <>
+                              <img
+                                src={`/images/${product.productName}.svg`}
+                                alt={product.productName}
+                                className="max-h-32 max-w-full object-contain mb-4"
+                              />
+                              <div className="text-center mt-auto">
+                                <a
+                                  href="javascript:void(0);"
+                                  className="inline-flex items-center gap-1 text-xs font-medium transition-colors"
+                                  style={{ color: '#6C6C6C' }}
+                                >
+                                  More info
+                                  <img src="/images/arrow.svg" alt="arrow" style={{ height: '12px' }} />
+                                </a>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="w-full h-full flex flex-col justify-start p-3 bg-white bg-opacity-95">
+                              <h4 className="text-xs font-semibold mb-2" style={{ color: '#034694' }}>Features</h4>
+                              <ul className="text-xs space-y-1 overflow-y-auto flex-1">
+                                {(productFeatures[product.productId] || []).map((feature, index) => (
+                                  <li
+                                    key={index}
+                                    className="flex items-start gap-2"
+                                    style={{ color: '#034694' }}
+                                  >
+                                    <span className="text-xs mt-0.5">•</span>
+                                    <span className="line-clamp-2">{feature}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {modules.map((module) => (
+            <Panel
+              key={module.moduleId}
+              module={module}
+              submodules={module.submodules || []}
+              onModuleClick={handleModuleClick}
+              onItemClick={handleItemClick}
+            />
+          ))}
+        </div>
+      )}
     </div>
-  )}
-</div>
-
-
   );
 };
 
-
-
-
 export default SiteMap;
-

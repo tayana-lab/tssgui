@@ -97,10 +97,12 @@ const Main = () => {
 
         {/* Scrollable page content */}
         <div
-          className="tss-content-body flex-1"
+          className="flex-1 overflow-y-auto"
           style={{ backgroundColor: 'var(--color-bg)' }}
         >
-          <Outlet />
+          <div className="tss-content-body">
+            <Outlet />
+          </div>
         </div>
 
         {/* Footer */}

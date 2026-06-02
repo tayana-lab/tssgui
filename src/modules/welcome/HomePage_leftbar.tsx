@@ -38,8 +38,11 @@ const HomePage_leftbar: React.FC = () => {
   return (
     <aside
       className="tss-sidebar"
-      style={{ width: isExpanded ? 'var(--sidebar-width)' : 'var(--sidebar-width-sm)' }}
-      onMouseEnter={() => setIsHovered(true)}
+      style={{ 
+        width: isExpanded ? 'var(--sidebar-width)' : 'var(--sidebar-width-sm)',
+        overflowX: 'hidden',
+      }}
+      onMouseEnter={() => !menuSidebarCollapsed || setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       aria-label="Main navigation"
     >
@@ -51,10 +54,10 @@ const HomePage_leftbar: React.FC = () => {
             : `/images/${tssguiConf.PRODUCT_LOGO_MIN}`}
           alt="Product logo"
           style={{
-            height:    isExpanded ? '36px' : '28px',
-            width:     isExpanded ? 'auto' : '40px',
+            height:    isExpanded ? '32px' : '24px',
+            width:     isExpanded ? 'auto' : '36px',
             objectFit: 'contain',
-            transition: 'all 200ms ease',
+            transition: 'all 150ms ease',
           }}
         />
       </div>
