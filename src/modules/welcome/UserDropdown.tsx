@@ -85,24 +85,25 @@ const UserDropdown = () => {
         >
           {/* Header */}
           <div
-            className="flex flex-col items-center px-4 py-4"
+            className="flex flex-col items-center px-4 py-4 border-b"
             style={{
-              background: 'linear-gradient(135deg, #ffffff 0%, #c4b0f3 100%)',
-              borderRadius: '0',
+              backgroundColor: 'var(--color-card-header-bg)',
+              borderColor: 'var(--color-border)',
             }}
           >
-            <img
-              src="/images/user.svg"
-              alt="User profile"
-              className="rounded-full mb-2"
+            <div
+              className="rounded-full mb-2 flex items-center justify-center"
               style={{
                 width: '52px',
                 height: '52px',
-                border: '2px solid rgba(255,255,255,0.5)',
-                backgroundColor: '#fafafa',
+                backgroundColor: 'var(--color-primary-light)',
+                color: 'var(--color-primary)',
+                fontSize: '1.5rem',
               }}
-            />
-            <p className="text-sm font-semibold text-center" style={{ color: '#2D3748' }}>
+            >
+              <i className="fas fa-user" />
+            </div>
+            <p className="text-sm font-semibold text-center truncate max-w-full px-2" style={{ color: 'var(--color-text)' }}>
               {email}
             </p>
           </div>
