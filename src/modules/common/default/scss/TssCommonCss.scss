@@ -49,7 +49,7 @@ $tss-pannel-gradient: #efeafb;
 
 
 body {
-  font-family: 'Gilroy', sans-serif !important;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
 .modal-backdrop {
@@ -1686,7 +1686,7 @@ input:checked+.slider {
 .tsslogin-anchor {
   color: $tss-primary-color ;
   //font-family:system-ui;
-  font-family: 'Gilroy', sans-serif;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: initial;
 }
 
@@ -1694,14 +1694,14 @@ input:checked+.slider {
   margin-bottom: 30px;
   text-align: center;
   //font-family: system-ui;
-  font-family: 'Gilroy', sans-serif;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: medium;
 }
 
 #tsslogin-form p.form-title {
   color: $tss-options-selected ;
   //font-family: 'Josefin Sans', sans-serif;
-  font-family: 'Gilroy', sans-serif;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: 38px;
   font-weight: bold;
   line-height: 1;

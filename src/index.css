@@ -664,7 +664,6 @@ body {
   .tss-page-title {
     @apply text-base font-semibold;
     color: var(--color-text);
-    font-family: 'Gilroy-Bold', sans-serif;
   }
 
   .tss-section-title {
