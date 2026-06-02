@@ -30,7 +30,7 @@ const Main = () => {
         const languageId = data[0]?.languageId;
         i18n.changeLanguage(languageId === '1' ? 'en' : 'in');
       } catch {
-        // non-critical — language falls back to default
+        /* non-critical */
       }
     };
     languageDetails();
@@ -50,16 +50,11 @@ const Main = () => {
 
   /*
    * LAYOUT STRATEGY
-   * ---------------
-   * The topbar (.tss-topbar) is position:fixed — out of normal flow.
-   * The sidebar (.tss-sidebar) is also position:fixed — out of normal flow.
-   *
-   * Therefore the <main> element must NOT be inside a flex row with the
-   * sidebar (that only works when the sidebar is in-flow). Instead we
-   * offset <main> with margin-left matching the current sidebar width,
-   * and pad the top to clear the fixed topbar.
-   *
-   * Transitions on margin-left give the smooth sidebar-collapse animation.
+   * ──────────────
+   * tss-topbar  → position: fixed, height: 44px, full width, z-index 1030
+   * tss-sidebar → position: fixed, from top 44px to bottom, z-index 1020
+   * <main>      → margin-left matches sidebar width; padding-top clears topbar
+   *               Contains: page-header (44px) + scrollable content
    */
   const sidebarWidth = menuSidebarCollapsed
     ? 'var(--sidebar-width-sm)'
@@ -67,51 +62,37 @@ const Main = () => {
 
   return (
     <>
-      {/* ── Fixed top navigation bar ── */}
+      {/* Fixed topbar */}
       <Header />
 
-      {/* ── Fixed left sidebar ── */}
+      {/* Fixed sidebar */}
       <HomePage_leftbar />
 
-      {/*
-       * ── Main content area ──
-       * padding-top clears the fixed topbar.
-       * margin-left clears the fixed sidebar.
-       * Both transition smoothly when sidebar collapses.
-       */}
+      {/* Main content — offset from sidebar and topbar */}
       <main
         id="rightSectionDiv"
         style={{
-          paddingTop:  'var(--topbar-height)',
-          marginLeft:  sidebarWidth,
-          minHeight:   '100vh',
-          transition:  'margin-left var(--transition)',
+          paddingTop:      'var(--topbar-height)',
+          marginLeft:      sidebarWidth,
+          minHeight:       '100vh',
+          transition:      'margin-left var(--transition)',
           backgroundColor: 'var(--color-bg)',
-          display:     'flex',
-          flexDirection: 'column',
+          display:         'flex',
+          flexDirection:   'column',
         }}
       >
-        {/* Breadcrumb / page-title bar */}
+        {/* Compact page header with title + breadcrumb */}
         <TssContentHeader />
 
-        {/* Scrollable page content - use full remaining height */}
-        <div
-          className="flex-1 overflow-y-auto"
-          style={{ 
-            backgroundColor: 'var(--color-bg)',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <div className="tss-content-body flex-1">
+        {/* Scrollable content area — fills remaining viewport */}
+        <div className="tss-content-scroll">
+          <div className="tss-content-body">
             <Outlet />
           </div>
         </div>
-
-        {/* No footer - branding moved to sidebar */}
       </main>
 
-      {/* ── Mobile sidebar backdrop ── */}
+      {/* Mobile sidebar backdrop */}
       {!menuSidebarCollapsed && (
         <div
           className="tss-sidebar-overlay lg:hidden"

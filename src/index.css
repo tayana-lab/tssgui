@@ -1,5 +1,5 @@
 /* ====================================================
-   Tailwind base directives
+   Google Fonts — Inter
    ==================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -8,235 +8,267 @@
 @tailwind utilities;
 
 /* ====================================================
-   CSS design tokens — light mode
+   CSS design tokens — light mode (default)
    ==================================================== */
 :root {
   /* Brand */
-  --color-primary:        #347DC1;
-  --color-primary-dark:   #2A6499;
-  --color-primary-light:  #D1E5F6;
-  --color-accent:         #8C287B;
-  --color-accent-light:   #c4b0f3;
+  --color-primary:            #347DC1;
+  --color-primary-dark:       #2A6499;
+  --color-primary-light:      #EBF3FB;
+  --color-accent:             #8C287B;
 
   /* Surfaces */
-  --color-bg:             #f4f6f9;
-  --color-bg-alt:         #ffffff;
-  --color-border:         #e2e8f0;
-  --color-border-subtle:  #edf2f7;
+  --color-bg:                 #F7F8FA;
+  --color-bg-alt:             #FFFFFF;
+  --color-surface:            #FFFFFF;
+  --color-surface-raised:     #F7F8FA;
+  --color-border:             #E4E7EC;
+  --color-border-subtle:      #F0F2F5;
 
   /* Text */
-  --color-text:           #1A202C;
-  --color-text-muted:     #6B7A99;
-  --color-text-invert:    #ffffff;
+  --color-text:               #111827;
+  --color-text-secondary:     #374151;
+  --color-text-muted:         #6B7280;
+  --color-text-placeholder:   #9CA3AF;
+  --color-text-invert:        #FFFFFF;
 
-  /* Component surfaces */
-  --color-sidebar-bg:     #ffffff;
-  --color-sidebar-text:   #2D3748;
-  --color-sidebar-hover:  #EBF3FB;
-  --color-sidebar-active: #347DC1;
-  --color-sidebar-active-text: #ffffff;
-  --color-topbar-bg:      #ffffff;
-  --color-topbar-text:    #2D3748;
-  --color-topbar-border:  #e2e8f0;
+  /* Topbar */
+  --color-topbar-bg:          #FFFFFF;
+  --color-topbar-text:        #374151;
+  --color-topbar-border:      #E4E7EC;
 
-  /* Cards / panels */
-  --color-card-bg:        #ffffff;
-  --color-card-header:    #f8fafc;
-  --color-card-border:    #e2e8f0;
+  /* Sidebar */
+  --color-sidebar-bg:         #FFFFFF;
+  --color-sidebar-text:       #374151;
+  --color-sidebar-muted:      #6B7280;
+  --color-sidebar-hover:      #F3F8FD;
+  --color-sidebar-active-bg:  #EBF3FB;
+  --color-sidebar-active:     #347DC1;
+  --color-sidebar-active-text:#1D5FA0;
+  --color-sidebar-border:     #E4E7EC;
+  --color-sidebar-section:    #9CA3AF;
+
+  /* Cards */
+  --color-card-bg:            #FFFFFF;
+  --color-card-border:        #E4E7EC;
+  --color-card-header-bg:     #F9FAFB;
 
   /* Tables */
-  --color-table-header:   #f4f6f9;
-  --color-table-row-alt:  #fafbfc;
-  --color-table-border:   #e2e8f0;
-  --color-table-hover:    #EBF3FB;
+  --color-table-header-bg:    #F9FAFB;
+  --color-table-header-text:  #6B7280;
+  --color-table-border:       #E4E7EC;
+  --color-table-row-alt:      #FAFAFA;
+  --color-table-row-hover:    #F0F7FF;
 
   /* Inputs */
-  --color-input-bg:       #ffffff;
-  --color-input-border:   #d1d7e2;
-  --color-input-focus:    #347DC1;
+  --color-input-bg:           #FFFFFF;
+  --color-input-border:       #D1D5DB;
+  --color-input-focus:        #347DC1;
 
   /* Buttons */
-  --color-btn-primary:    #347DC1;
-  --color-btn-primary-hover: #2A6499;
-  --color-btn-primary-text: #ffffff;
+  --color-btn-primary:        #347DC1;
+  --color-btn-primary-hover:  #2A6499;
+  --color-btn-primary-text:   #FFFFFF;
 
-  /* Modal */
-  --color-modal-bg:       #ffffff;
-  --color-modal-header:   #f8fafc;
-  --color-overlay:        rgba(0, 0, 0, 0.45);
+  /* Modals */
+  --color-modal-bg:           #FFFFFF;
+  --color-modal-header-bg:    #F9FAFB;
+  --color-overlay:            rgba(17, 24, 39, 0.50);
 
   /* Feedback */
-  --color-success:        #38a169;
-  --color-warning:        #d97706;
-  --color-error:          #e53e3e;
-  --color-info:           #3182ce;
+  --color-success:            #16A34A;
+  --color-warning:            #D97706;
+  --color-error:              #DC2626;
+  --color-info:               #2563EB;
 
-  /* Misc */
-  --radius-card:          8px;
-  --radius-modal:         12px;
-  --radius-btn:           6px;
-  --shadow-card:          0 1px 4px 0 rgba(0,0,0,0.10);
-  --shadow-modal:         0 8px 32px rgba(0,0,0,0.18);
-  --sidebar-width:        256px;
-  --sidebar-width-sm:     60px;
-  --topbar-height:        48px;
-  --transition:           200ms ease;
+  /* Radii */
+  --radius-sm:                4px;
+  --radius-md:                6px;
+  --radius-lg:                8px;
+  --radius-xl:                12px;
+  --radius-card:              8px;
+  --radius-modal:             12px;
+  --radius-btn:               6px;
+
+  /* Shadows — minimal, like Vercel/Linear */
+  --shadow-xs:                0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm:                0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:                0 4px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-lg:                0 8px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-modal:             0 20px 60px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08);
+
+  /* Layout geometry */
+  --topbar-height:            44px;
+  --sidebar-width:            240px;
+  --sidebar-width-sm:         56px;
+  --content-max-width:        1440px;
+
+  /* Motion */
+  --transition:               150ms ease;
+  --transition-slow:          250ms ease;
 }
 
 /* ====================================================
-   Dark mode tokens  (body.dark-mode)
+   Dark mode tokens
    ==================================================== */
 body.dark-mode {
-  --color-bg:             #0D1117;
-  --color-bg-alt:         #161B22;
-  --color-border:         #30363D;
-  --color-border-subtle:  #21262D;
+  --color-bg:                 #0D1117;
+  --color-bg-alt:             #161B22;
+  --color-surface:            #161B22;
+  --color-surface-raised:     #1F2937;
+  --color-border:             #30363D;
+  --color-border-subtle:      #21262D;
 
-  --color-text:           #E6EDF3;
-  --color-text-muted:     #8B949E;
-  --color-text-invert:    #0D1117;
+  --color-text:               #F0F6FC;
+  --color-text-secondary:     #CDD9E5;
+  --color-text-muted:         #8B949E;
+  --color-text-placeholder:   #6E7681;
+  --color-text-invert:        #0D1117;
 
-  --color-sidebar-bg:     #161B22;
-  --color-sidebar-text:   #C9D1D9;
-  --color-sidebar-hover:  #1F2937;
-  --color-sidebar-active: #347DC1;
-  --color-sidebar-active-text: #ffffff;
-  --color-topbar-bg:      #161B22;
-  --color-topbar-text:    #C9D1D9;
-  --color-topbar-border:  #30363D;
+  --color-topbar-bg:          #161B22;
+  --color-topbar-text:        #CDD9E5;
+  --color-topbar-border:      #30363D;
 
-  --color-card-bg:        #161B22;
-  --color-card-header:    #1F2937;
-  --color-card-border:    #30363D;
+  --color-sidebar-bg:         #161B22;
+  --color-sidebar-text:       #CDD9E5;
+  --color-sidebar-muted:      #8B949E;
+  --color-sidebar-hover:      #1C2128;
+  --color-sidebar-active-bg:  #1C2D3F;
+  --color-sidebar-active:     #58A6FF;
+  --color-sidebar-active-text:#58A6FF;
+  --color-sidebar-border:     #30363D;
+  --color-sidebar-section:    #6E7681;
 
-  --color-table-header:   #1F2937;
-  --color-table-row-alt:  #0D1117;
-  --color-table-border:   #30363D;
-  --color-table-hover:    #1F2937;
+  --color-card-bg:            #161B22;
+  --color-card-border:        #30363D;
+  --color-card-header-bg:     #1F2937;
 
-  --color-input-bg:       #1F2937;
-  --color-input-border:   #30363D;
+  --color-table-header-bg:    #1C2128;
+  --color-table-header-text:  #8B949E;
+  --color-table-border:       #30363D;
+  --color-table-row-alt:      #0D1117;
+  --color-table-row-hover:    #1C2D3F;
 
-  --color-modal-bg:       #161B22;
-  --color-modal-header:   #1F2937;
-  --color-overlay:        rgba(0, 0, 0, 0.65);
+  --color-input-bg:           #1F2937;
+  --color-input-border:       #30363D;
+  --color-input-focus:        #58A6FF;
 
-  --color-btn-primary:    #347DC1;
-  --color-btn-primary-hover: #4797E2;
+  --color-modal-bg:           #161B22;
+  --color-modal-header-bg:    #1F2937;
+  --color-overlay:            rgba(0, 0, 0, 0.70);
 
-  --color-input-bg:       #161B22;
-  --color-input-border:   #30363D;
-  --color-input-focus:    #4797E2;
-
-  --color-text:           #E6EDF3;
-  --color-text-muted:     #8B949E;
-  --color-text-invert:    #0D1117;
-
-  --color-primary:        #4797E2;
-  --color-primary-dark:   #347DC1;
-  --color-primary-light:  #1F2937;
+  --color-primary:            #58A6FF;
+  --color-primary-dark:       #388BFD;
+  --color-primary-light:      #1C2D3F;
 }
 
 /* ====================================================
-   Blue mode tokens  (body.blue-mode)
+   Blue mode tokens
    ==================================================== */
 body.blue-mode {
-  --color-bg:             #EBF3FB;
-  --color-bg-alt:         #ffffff;
-  --color-border:         #bdd6f0;
+  --color-bg:                 #EBF3FB;
+  --color-bg-alt:             #FFFFFF;
+  --color-surface:            #FFFFFF;
+  --color-border:             #BDCFE8;
+  --color-border-subtle:      #D4E4F4;
 
-  --color-sidebar-bg:     #1E3A5F;
-  --color-sidebar-text:   #c8dff4;
-  --color-sidebar-hover:  #2A4F80;
-  --color-sidebar-active: #347DC1;
-  --color-sidebar-active-text: #ffffff;
-  --color-topbar-bg:      #1E3A5F;
-  --color-topbar-text:    #ffffff;
-  --color-topbar-border:  #2A4F80;
+  --color-sidebar-bg:         #1E3A5F;
+  --color-sidebar-text:       #C8DFFE;
+  --color-sidebar-muted:      #8AAAC8;
+  --color-sidebar-hover:      #243F67;
+  --color-sidebar-active-bg:  #243F67;
+  --color-sidebar-active:     #7EC8FB;
+  --color-sidebar-active-text:#7EC8FB;
+  --color-sidebar-border:     #243F67;
+  --color-sidebar-section:    #6A90B0;
 
-  --color-card-bg:        #ffffff;
-  --color-card-header:    #EBF3FB;
-  --color-card-border:    #bdd6f0;
+  --color-topbar-bg:          #1E3A5F;
+  --color-topbar-text:        #FFFFFF;
+  --color-topbar-border:      #243F67;
 
-  --color-table-header:   #D1E5F6;
-  --color-table-hover:    #EBF3FB;
-  --color-table-border:   #bdd6f0;
+  --color-card-bg:            #FFFFFF;
+  --color-card-border:        #BDCFE8;
+  --color-card-header-bg:     #F0F7FF;
 
-  --color-text:           #1A202C;
-  --color-text-muted:     #4A5568;
-  --color-input-bg:       #ffffff;
-  --color-input-border:   #bdd6f0;
+  --color-table-header-bg:    #D4E4F4;
+  --color-table-header-text:  #2A5A8E;
+  --color-table-border:       #BDCFE8;
+  --color-table-row-hover:    #EBF3FB;
+
+  --color-text:               #111827;
+  --color-text-secondary:     #1E3A5F;
+  --color-text-muted:         #4A6785;
 }
 
 /* ====================================================
-   Base reset & body
+   Base reset
    ==================================================== */
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
 html {
-  font-size: 14px;
+  font-size: 13px;
   scroll-behavior: smooth;
+  background-color: var(--color-bg);
 }
 
 body {
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  background-color: var(--color-bg);
-  color: var(--color-text);
   font-weight: 400;
   line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ====================================================
-   Scrollbar styling
+   Scrollbar — minimal Chrome-style
    ==================================================== */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
-}
+::-webkit-scrollbar           { width: 4px; height: 4px; }
+::-webkit-scrollbar-track     { background: transparent; }
+::-webkit-scrollbar-thumb     { background: var(--color-border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover{ background: var(--color-text-muted); }
 
 /* ====================================================
-   Tailwind @layer components — shared UI primitives
-   These replace the old tss-* SCSS classes
+   Tailwind @layer components — shared UI system
    ==================================================== */
 @layer components {
 
-  /* ---- Layout shell ---- */
+  /* ================================================
+     LAYOUT SHELL
+     ================================================ */
   .tss-layout {
-    @apply flex h-screen overflow-hidden;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
   }
 
-  /* ---- Topbar ---- */
+  /* ================================================
+     TOPBAR
+     ================================================ */
   .tss-topbar {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 1rem;
-    padding: 0 1rem;
+    top: 0; left: 0; right: 0;
     height: var(--topbar-height);
     z-index: 1030;
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem;
+    gap: 0.5rem;
     background-color: var(--color-topbar-bg);
     color: var(--color-topbar-text);
     border-bottom: 1px solid var(--color-topbar-border);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    transition: background-color var(--transition), color var(--transition);
+    box-shadow: var(--shadow-xs);
+    transition: background-color var(--transition), border-color var(--transition);
+  }
+
+  .tss-topbar-divider {
+    width: 1px;
+    height: 20px;
+    background-color: var(--color-border);
+    flex-shrink: 0;
   }
 
   .tss-topbar-icon-btn {
@@ -244,240 +276,457 @@ body {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 150ms ease, color 150ms ease;
-    color: var(--color-topbar-text);
-    background: transparent;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
     border: none;
+    background: transparent;
+    color: var(--color-topbar-text);
+    cursor: pointer;
+    transition: background-color var(--transition), color var(--transition);
     padding: 0;
-    line-height: 1;
   }
   .tss-topbar-icon-btn:hover {
-    background-color: rgba(52, 125, 193, 0.08);
+    background-color: var(--color-border-subtle);
+    color: var(--color-primary);
   }
   .tss-topbar-icon-btn:active {
-    background-color: rgba(52, 125, 193, 0.12);
+    background-color: var(--color-border);
   }
 
-  /* ---- Sidebar ---- */
+  /* Global search in topbar */
+  .tss-topbar-search {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 28px;
+    padding: 0 0.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text-muted);
+    font-size: 0.8125rem;
+    transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition);
+    cursor: text;
+    min-width: 200px;
+    max-width: 340px;
+    flex: 1;
+  }
+  .tss-topbar-search:focus-within {
+    border-color: var(--color-primary);
+    background-color: var(--color-surface);
+    box-shadow: 0 0 0 2px rgba(52, 125, 193, 0.12);
+  }
+  .tss-topbar-search input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 0.8125rem;
+    color: var(--color-text);
+    min-width: 0;
+  }
+  .tss-topbar-search input::placeholder {
+    color: var(--color-text-placeholder);
+  }
+
+  /* User chip */
+  .tss-user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color var(--transition), border-color var(--transition);
+    max-width: 200px;
+  }
+  .tss-user-chip:hover {
+    background-color: var(--color-surface-raised);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+
+  /* ================================================
+     SIDEBAR
+     ================================================ */
   .tss-sidebar {
     position: fixed;
     top: var(--topbar-height);
     bottom: 0;
     left: 0;
+    z-index: 1020;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    z-index: 1020;
-    width: var(--sidebar-width);
     background-color: var(--color-sidebar-bg);
-    border-right: 1px solid var(--color-border);
-    box-shadow: 1px 0 3px rgba(0, 0, 0, 0.04);
-    transition: width 150ms ease-out, background-color 150ms ease;
-  }
-
-  .tss-sidebar.collapsed {
-    width: var(--sidebar-width-sm);
+    border-right: 1px solid var(--color-sidebar-border);
+    transition: width 150ms ease-out, background-color var(--transition);
+    /* No box-shadow — clean flat border like Linear/Vercel */
   }
 
   .tss-sidebar-brand {
-    @apply flex items-center justify-center px-3 py-2.5 shrink-0;
-    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0 0.75rem;
     height: var(--topbar-height);
+    border-bottom: 1px solid var(--color-sidebar-border);
   }
 
   .tss-sidebar-scroll {
-    @apply flex-1 overflow-y-auto overflow-x-hidden py-2;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 0.5rem 0;
   }
 
-  /* ---- Menu items ---- */
+  /* Sidebar search wrapper */
+  .tss-sidebar-search-wrap {
+    padding: 0.5rem 0.625rem;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--color-border-subtle);
+  }
+
+  /* Section label */
+  .tss-sidebar-section {
+    padding: 1rem 0.75rem 0.25rem;
+    flex-shrink: 0;
+  }
+  .tss-sidebar-section-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-sidebar-section);
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  /* Sidebar divider */
+  .tss-sidebar-divider {
+    margin: 0.375rem 0.75rem;
+    border-top: 1px solid var(--color-border-subtle);
+  }
+
+  /* ================================================
+     SIDEBAR MENU ITEMS — Linear-inspired
+     ================================================ */
   .tss-menu-item {
-    @apply flex items-center gap-3 px-3 py-2 mx-2 my-0.5 rounded-md cursor-pointer select-none transition-all text-sm;
-    color: var(--color-sidebar-text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0.375rem 1px;
+    padding: 0.3125rem 0.5rem;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    user-select: none;
     white-space: nowrap;
     overflow: hidden;
-    position: relative;
-    border-left: 3px solid transparent;
-    padding-left: calc(0.75rem - 3px);
+    font-size: 0.8125rem;
     font-weight: 500;
+    color: var(--color-sidebar-text);
+    transition: background-color var(--transition), color var(--transition), border-color var(--transition);
+    position: relative;
   }
   .tss-menu-item:hover {
     background-color: var(--color-sidebar-hover);
-    color: var(--color-primary);
+    color: var(--color-sidebar-active);
   }
   .tss-menu-item.active {
-    background-color: transparent;
-    color: var(--color-primary);
+    background-color: var(--color-sidebar-active-bg);
+    color: var(--color-sidebar-active-text);
     font-weight: 600;
-    border-left-color: var(--color-primary);
-  }
-  .tss-menu-item.active:hover {
-    background-color: var(--color-sidebar-hover);
+    border-color: transparent;
   }
 
   .tss-menu-icon {
-    @apply shrink-0;
-    width: 18px;
+    flex-shrink: 0;
+    width: 16px;
+    font-size: 13px;
     text-align: center;
-    font-size: 15px;
+    opacity: 0.75;
+  }
+  .tss-menu-item.active .tss-menu-icon,
+  .tss-menu-item:hover .tss-menu-icon {
+    opacity: 1;
   }
 
   .tss-menu-label {
-    @apply flex-1 truncate;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .tss-menu-chevron {
-    @apply shrink-0 transition-transform duration-200;
-    font-size: 10px;
+    flex-shrink: 0;
+    font-size: 9px;
+    opacity: 0.5;
+    transition: transform 200ms ease;
   }
   .tss-menu-item.open .tss-menu-chevron {
-    transform: rotate(-90deg);
+    transform: rotate(90deg);
+  }
+  .tss-menu-item:hover .tss-menu-chevron {
+    opacity: 0.9;
   }
 
-  .tss-menu-section {
-    @apply flex flex-col py-2 first:pt-0;
-  }
-
-  .tss-menu-section-label {
-    @apply px-4 py-1.5 text-xs font-semibold uppercase tracking-widest select-none;
-    color: var(--color-text-muted);
-    letter-spacing: 0.05em;
-    opacity: 0.8;
-  }
-
-  .tss-menu-section-items {
-    @apply flex flex-col;
-  }
-
+  /* Submenu indented list */
   .tss-submenu {
-    @apply overflow-hidden;
+    overflow: hidden;
     transition: max-height 200ms ease, opacity 200ms ease;
   }
 
-  /* ---- Main content ---- */
+  /* Sidebar branding footer */
+  .tss-sidebar-footer {
+    padding: 0.5rem 0.75rem;
+    border-top: 1px solid var(--color-border-subtle);
+    font-size: 0.6875rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+
+  /* ================================================
+     CONTENT AREA
+     ================================================ */
   .tss-main {
-    @apply flex flex-col flex-1 overflow-hidden;
-    padding-top: var(--topbar-height);
-    margin-left: var(--sidebar-width);
-    transition: margin-left var(--transition);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
     background-color: var(--color-bg);
-  }
-  .tss-main.sidebar-collapsed {
-    margin-left: var(--sidebar-width-sm);
+    transition: margin-left var(--transition);
   }
 
-  .tss-content-wrapper {
-    @apply flex-1 overflow-y-auto;
-    padding: 0;
-  }
-
-  /* ---- Content header (breadcrumb bar) ---- */
-  .tss-content-header {
-    @apply flex items-center justify-between px-6 py-1.5 shrink-0 border-b;
+  /* Page header — title + breadcrumb combined, tight */
+  .tss-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    height: 44px;
+    flex-shrink: 0;
     background-color: var(--color-bg-alt);
-    border-color: var(--color-border-subtle);
-    min-height: 36px;
+    border-bottom: 1px solid var(--color-border);
     gap: 1rem;
   }
 
-  /* ---- Footer ---- */
-  .tss-footer {
-    @apply flex items-center justify-center px-4 py-2 text-xs shrink-0;
-    background-color: var(--color-bg-alt);
-    border-top: 1px solid var(--color-border-subtle);
-    color: var(--color-text-muted);
-    min-height: 36px;
+  .tss-page-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+    letter-spacing: -0.1px;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  /* ---- Cards / Panels ---- */
+  /* Breadcrumb */
+  .tss-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+  .tss-breadcrumb-link {
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: color var(--transition);
+    font-weight: 500;
+  }
+  .tss-breadcrumb-link:hover {
+    color: var(--color-primary);
+  }
+  .tss-breadcrumb-sep {
+    color: var(--color-border);
+    font-size: 0.625rem;
+  }
+  .tss-breadcrumb-current {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+  }
+
+  /* Scrollable content wrapper */
+  .tss-content-scroll {
+    flex: 1;
+    overflow-y: auto;
+    background-color: var(--color-bg);
+  }
+
+  /* Content inner padding */
+  .tss-content-body {
+    padding: 1.25rem 1.5rem;
+    max-width: var(--content-max-width);
+  }
+
+  /* ================================================
+     CARDS — Vercel-style flat cards
+     ================================================ */
   .tss-card {
-    @apply rounded-card overflow-hidden;
     background-color: var(--color-card-bg);
     border: 1px solid var(--color-card-border);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-    transition: box-shadow 150ms ease, border-color 150ms ease, transform 150ms ease;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    transition: box-shadow var(--transition), border-color var(--transition);
   }
   .tss-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-sm);
   }
+
   .tss-card-header {
-    @apply flex items-center justify-between px-4 py-3 text-sm font-semibold cursor-pointer;
-    background-color: var(--color-card-header);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 1rem;
+    background-color: var(--color-card-header-bg);
     border-bottom: 1px solid var(--color-card-border);
-    color: var(--color-text);
+    font-size: 0.8125rem;
     font-weight: 600;
+    color: var(--color-text);
+    cursor: pointer;
   }
   .tss-card-header.no-collapse {
     cursor: default;
   }
+
   .tss-card-body {
-    @apply px-4 py-4;
+    padding: 1rem;
     color: var(--color-text);
   }
+
   .tss-card-footer {
-    @apply flex items-center gap-2 px-4 py-3;
-    background-color: var(--color-card-header);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    background-color: var(--color-card-header-bg);
     border-top: 1px solid var(--color-card-border);
   }
 
-  /* ---- Tabs ---- */
-  .tss-tabs-nav {
-    @apply flex items-center border-b gap-1 px-4;
-    background-color: var(--color-bg-alt);
-    border-color: var(--color-border);
-  }
-  .tss-tab-btn {
-    @apply relative px-3 py-2 text-sm cursor-pointer select-none transition-colors;
-    color: var(--color-text-muted);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-  }
-  .tss-tab-btn:hover {
-    color: var(--color-primary);
-  }
-  .tss-tab-btn.active {
-    color: var(--color-primary);
-    border-bottom-color: var(--color-primary);
-    font-weight: 600;
-  }
-  .tss-tab-body {
-    @apply p-4;
-    background-color: var(--color-bg-alt);
+  /* ================================================
+     TABLES — GitHub-style minimal
+     ================================================ */
+  .tss-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-table-border);
+    background-color: var(--color-card-bg);
   }
 
-  /* ---- Buttons ---- */
+  .tss-table {
+    width: 100%;
+    font-size: 0.8125rem;
+    border-collapse: collapse;
+  }
+
+  .tss-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .tss-table th {
+    padding: 0.5rem 0.875rem;
+    text-align: left;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-table-header-text);
+    background-color: var(--color-table-header-bg);
+    border-bottom: 1px solid var(--color-table-border);
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .tss-table td {
+    padding: 0.5rem 0.875rem;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border-subtle);
+    vertical-align: middle;
+    line-height: 1.4;
+  }
+
+  .tss-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .tss-table tbody tr:hover td {
+    background-color: var(--color-table-row-hover);
+    color: var(--color-text);
+  }
+
+  /* Striped rows — subtle */
+  .tss-table tbody tr:nth-child(even) td {
+    background-color: var(--color-table-row-alt);
+  }
+  .tss-table tbody tr:nth-child(even):hover td {
+    background-color: var(--color-table-row-hover);
+  }
+
+  /* ================================================
+     BUTTONS — Stripe-inspired
+     ================================================ */
   .tss-btn {
-    @apply inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-btn
-           transition-all cursor-pointer select-none whitespace-nowrap border-0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3125rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: var(--radius-btn);
+    border: 1px solid transparent;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition: background-color var(--transition), box-shadow var(--transition), border-color var(--transition), transform var(--transition);
     background-color: var(--color-btn-primary);
     color: var(--color-btn-primary-text);
-    box-shadow: 0 2px 4px rgba(52, 125, 193, 0.20);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    line-height: 1.4;
   }
   .tss-btn:hover:not(:disabled) {
     background-color: var(--color-btn-primary-hover);
-    box-shadow: 0 4px 12px rgba(52, 125, 193, 0.30);
-    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(52, 125, 193, 0.25);
   }
   .tss-btn:active:not(:disabled) {
-    transform: translateY(0);
+    transform: translateY(1px);
+    box-shadow: none;
   }
   .tss-btn:disabled,
   .tss-btn.tss-btn-disabled {
-    @apply opacity-50 cursor-not-allowed;
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .tss-btn-sm {
+    @apply tss-btn;
+    padding: 0.1875rem 0.5rem;
+    font-size: 0.75rem;
   }
 
   .tss-btn-outline {
     @apply tss-btn;
     background-color: transparent;
-    color: var(--color-btn-primary);
-    border: 1px solid var(--color-btn-primary);
+    color: var(--color-text-secondary);
+    border-color: var(--color-border);
     box-shadow: none;
   }
   .tss-btn-outline:hover:not(:disabled) {
-    background-color: var(--color-primary-light);
+    background-color: var(--color-surface-raised);
+    border-color: var(--color-text-muted);
+    color: var(--color-text);
   }
 
   .tss-btn-ghost {
@@ -485,255 +734,297 @@ body {
     background-color: transparent;
     color: var(--color-text-muted);
     box-shadow: none;
+    border-color: transparent;
   }
   .tss-btn-ghost:hover:not(:disabled) {
     background-color: var(--color-border-subtle);
     color: var(--color-text);
   }
 
-  /* ---- Modal ---- */
+  .tss-btn-danger {
+    @apply tss-btn;
+    background-color: var(--color-error);
+    color: #fff;
+    border-color: transparent;
+  }
+  .tss-btn-danger:hover:not(:disabled) {
+    background-color: #B91C1C;
+  }
+
+  /* Icon-only button */
+  .tss-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: background-color var(--transition), color var(--transition);
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .tss-icon-btn:hover {
+    background-color: var(--color-border-subtle);
+    color: var(--color-primary);
+  }
+  .tss-icon-btn.danger:hover {
+    background-color: #FEF2F2;
+    color: var(--color-error);
+  }
+
+  /* ================================================
+     MODAL
+     ================================================ */
   .tss-modal-backdrop {
-    @apply fixed inset-0 z-[1040] flex items-center justify-center;
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: var(--color-overlay);
     backdrop-filter: blur(2px);
   }
+
   .tss-modal-dialog {
-    @apply relative w-full mx-4 rounded-modal overflow-hidden flex flex-col;
+    position: relative;
+    width: 100%;
+    margin: 1rem;
+    border-radius: var(--radius-modal);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     background-color: var(--color-modal-bg);
     box-shadow: var(--shadow-modal);
-    max-height: calc(100vh - 64px);
+    max-height: calc(100vh - 3rem);
+    border: 1px solid var(--color-border);
   }
   .tss-modal-dialog.modal-sm  { max-width: 400px; }
   .tss-modal-dialog.modal-md  { max-width: 560px; }
-  .tss-modal-dialog.modal-lg  { max-width: 860px; }
-  .tss-modal-dialog.modal-xl  { max-width: 1100px; }
+  .tss-modal-dialog.modal-lg  { max-width: 820px; }
+  .tss-modal-dialog.modal-xl  { max-width: 1060px; }
+
   .tss-modal-header {
-    @apply flex items-center justify-between px-5 py-3 text-sm font-semibold shrink-0;
-    background-color: var(--color-modal-header);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text);
+    background-color: var(--color-modal-header-bg);
     border-bottom: 1px solid var(--color-border);
-    color: var(--color-text);
-  }
-  .tss-modal-body {
-    @apply flex-1 overflow-y-auto px-5 py-4;
-    color: var(--color-text);
-  }
-  .tss-modal-footer {
-    @apply flex items-center justify-end gap-2 px-5 py-3 shrink-0;
-    background-color: var(--color-modal-header);
-    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
   }
 
-  /* ---- Form inputs ---- */
-  .tss-input {
-    @apply w-full px-3 py-2 text-sm rounded-btn transition-colors outline-none;
-    background-color: var(--color-input-bg);
-    border: 1px solid var(--color-input-border);
+  .tss-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.25rem;
     color: var(--color-text);
+  }
+
+  .tss-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--color-modal-header-bg);
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+  }
+
+  /* ================================================
+     FORM INPUTS
+     ================================================ */
+  .tss-input {
+    width: 100%;
+    padding: 0.3125rem 0.625rem;
+    font-size: 0.8125rem;
+    font-family: inherit;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-input-border);
+    background-color: var(--color-input-bg);
+    color: var(--color-text);
+    outline: none;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    line-height: 1.5;
   }
   .tss-input:focus {
     border-color: var(--color-input-focus);
-    box-shadow: 0 0 0 3px rgba(52,125,193,0.15);
+    box-shadow: 0 0 0 2px rgba(52,125,193,0.12);
   }
   .tss-input::placeholder {
-    color: var(--color-text-muted);
+    color: var(--color-text-placeholder);
+  }
+  .tss-input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background-color: var(--color-surface-raised);
   }
 
   .tss-label {
-    @apply block text-xs font-medium mb-1;
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
     color: var(--color-text-muted);
+    margin-bottom: 0.25rem;
+    user-select: none;
   }
 
   .tss-select {
-    @apply tss-input pr-8;
+    @apply tss-input;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7A99' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 10px center;
+    background-position: right 8px center;
+    padding-right: 1.75rem;
   }
 
-  /* ---- Tables ---- */
-  .tss-table-wrap {
-    @apply w-full overflow-x-auto rounded-card;
-    border: 1px solid var(--color-table-border);
+  /* ================================================
+     TABS
+     ================================================ */
+  .tss-tabs-nav {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-bottom: 1px solid var(--color-border);
     background-color: var(--color-card-bg);
+    padding: 0 1rem;
   }
-  .tss-table {
-    @apply w-full text-sm border-collapse;
-  }
-  .tss-table thead {
-    @apply sticky top-0 z-10;
-  }
-  .tss-table th {
-    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-widest whitespace-nowrap;
-    background-color: var(--color-table-header);
+
+  .tss-tab-btn {
+    position: relative;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
     color: var(--color-text-muted);
-    border-bottom: 1px solid var(--color-table-border);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color var(--transition);
+    white-space: nowrap;
+    user-select: none;
+  }
+  .tss-tab-btn:hover {
+    color: var(--color-text);
+  }
+  .tss-tab-btn.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
     font-weight: 600;
   }
-  .tss-table td {
-    @apply px-4 py-3 text-sm;
-    color: var(--color-text);
-    border-bottom: 1px solid var(--color-table-border);
-  }
-  .tss-table tr:last-child td {
-    border-bottom: none;
-  }
-  .tss-table tbody tr:hover td {
-    background-color: var(--color-table-hover);
-  }
-  .tss-table tbody tr:nth-child(even) td {
-    background-color: var(--color-table-row-alt);
-  }
-  .tss-table tbody tr:nth-child(even):hover td {
-    background-color: var(--color-table-hover);
+
+  .tss-tab-body {
+    padding: 1rem;
+    background-color: var(--color-card-bg);
   }
 
-  /* ---- Breadcrumb ---- */
-  .tss-breadcrumb {
-    @apply flex items-center gap-2 text-xs font-medium;
-    color: var(--color-text-muted);
-  }
-  .tss-breadcrumb a,
-  .tss-breadcrumb-home {
-    color: var(--color-primary);
-    text-decoration: none;
-    transition: color 150ms ease;
-    cursor: pointer;
-  }
-  .tss-breadcrumb a:hover,
-  .tss-breadcrumb-home:hover {
-    color: var(--color-primary-dark);
-  }
-
-  /* ---- Page title ---- */
-  .tss-page-title {
-    @apply text-xl font-bold;
-    color: var(--color-text);
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-  }
-
-  /* ---- Alert / Toast ---- */
+  /* ================================================
+     ALERTS / BADGES
+     ================================================ */
   .tss-alert {
-    @apply flex items-start gap-3 px-4 py-3 rounded-btn text-sm;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: var(--radius-md);
     border: 1px solid;
+    font-size: 0.8125rem;
   }
-  .tss-alert-error   { border-color: var(--color-error);   background-color: #fff5f5; color: var(--color-error); }
-  .tss-alert-success { border-color: var(--color-success); background-color: #f0fff4; color: var(--color-success); }
-  .tss-alert-warning { border-color: var(--color-warning); background-color: #fffbeb; color: var(--color-warning); }
-  .tss-alert-info    { border-color: var(--color-info);    background-color: #ebf8ff; color: var(--color-info); }
+  .tss-alert-error   { border-color: #FECACA; background-color: #FEF2F2; color: #991B1B; }
+  .tss-alert-success { border-color: #BBF7D0; background-color: #F0FDF4; color: #14532D; }
+  .tss-alert-warning { border-color: #FDE68A; background-color: #FFFBEB; color: #92400E; }
+  .tss-alert-info    { border-color: #BFDBFE; background-color: #EFF6FF; color: #1E40AF; }
 
-  /* ---- Sidebar overlay (mobile) ---- */
-  .tss-sidebar-overlay {
-    @apply fixed inset-0 z-[1010] bg-black/40;
+  .tss-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.0625rem 0.375rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.5;
+    white-space: nowrap;
   }
+  .tss-badge-primary { background-color: var(--color-primary-light); color: var(--color-primary-dark); }
+  .tss-badge-success { background-color: #D1FAE5; color: #065F46; }
+  .tss-badge-warning { background-color: #FEF3C7; color: #92400E; }
+  .tss-badge-error   { background-color: #FEE2E2; color: #991B1B; }
+  .tss-badge-neutral { background-color: var(--color-border-subtle); color: var(--color-text-muted); }
 
-  /* ---- Dropdown ---- */
+  /* ================================================
+     DROPDOWN
+     ================================================ */
   .tss-dropdown {
-    @apply absolute z-[1050] rounded-card py-1 min-w-[180px];
+    position: absolute;
+    z-index: 1050;
+    padding: 0.25rem;
+    min-width: 160px;
+    border-radius: var(--radius-lg);
     background-color: var(--color-card-bg);
     border: 1px solid var(--color-border);
-    box-shadow: var(--shadow-modal);
+    box-shadow: var(--shadow-lg);
   }
   .tss-dropdown-item {
-    @apply flex items-center gap-2 px-4 py-2 text-sm cursor-pointer transition-colors;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.8125rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color var(--transition), color var(--transition);
     color: var(--color-text);
+    user-select: none;
   }
   .tss-dropdown-item:hover {
     background-color: var(--color-sidebar-hover);
     color: var(--color-primary);
   }
   .tss-dropdown-divider {
-    @apply my-1;
+    margin: 0.25rem 0;
     border-top: 1px solid var(--color-border);
   }
 
-  /* ---- User avatar chip ---- */
-  .tss-user-chip {
-    @apply flex items-center gap-2 px-2.5 py-1.5 rounded-full cursor-pointer transition-all text-xs font-medium;
-    color: var(--color-topbar-text);
-    background: var(--color-sidebar-hover);
-  }
-  .tss-user-chip:hover {
-    background-color: var(--color-primary-light);
-    color: var(--color-primary);
-  }
-
-  /* ---- Heading ---- */
-  .tss-page-title {
-    @apply text-base font-semibold;
-    color: var(--color-text);
+  /* ================================================
+     MOBILE OVERLAY
+     ================================================ */
+  .tss-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1010;
+    background: rgba(0,0,0,0.35);
   }
 
+  /* ================================================
+     SECTION TITLE
+     ================================================ */
   .tss-section-title {
-    @apply text-sm font-semibold mb-3;
+    font-size: 0.8125rem;
+    font-weight: 600;
     color: var(--color-text);
+    margin-bottom: 0.625rem;
   }
 
-  /* ---- Content body wrapper ---- */
-  .tss-content-body {
-    @apply p-6;
-  }
-
-  /* Responsive padding */
-  @media (max-width: 1024px) {
-    .tss-content-body {
-      @apply p-5;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .tss-content-body {
-      @apply p-4;
-    }
-  }
-
-  /* ---- Search bar styling ---- */
-  .tss-search-input {
-    background-color: var(--color-input-bg);
-    color: var(--color-text);
-  }
-  .tss-search-input::placeholder {
-    color: var(--color-text-muted);
-  }
-
-  /* ---- Search bar ---- */
-  .tss-search-bar {
-    @apply flex items-center gap-2 px-3 py-1.5 rounded-full text-sm;
-    background-color: var(--color-surface, #f4f6f9);
-    border: 1px solid var(--color-border);
-    color: var(--color-text-muted);
-  }
-  .tss-search-bar input {
-    @apply bg-transparent outline-none text-sm w-full;
-    color: var(--color-text);
-  }
-  .tss-search-bar input::placeholder {
-    color: var(--color-text-muted);
+  /* ================================================
+     CONTENT HEADER (legacy alias kept for compat)
+     ================================================ */
+  .tss-content-header {
+    @apply tss-page-header;
   }
 }
 
 /* ====================================================
-   Legacy AdminLTE overrides — keep the app working
-   while we progressively remove Bootstrap
+   Legacy SCSS overrides — strip leftover Bootstrap
    ==================================================== */
-.wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* Ensure existing Bootstrap-based components still render
-   until they are migrated */
-.content-wrapper {
-  background-color: var(--color-bg) !important;
-}
-
-/* ====================================================
-   Zoom / print hide
-   ==================================================== */
-@media only screen and (min-resolution: 192dpi),
-       only screen and (min-resolution: 2dppx) {
-  .zoom-hide-text { display: none; }
+.content-wrapper,
+.wrapper,
+.sidebar-wrapper {
+  all: unset;
 }

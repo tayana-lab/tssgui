@@ -3,243 +3,317 @@ import { useNavigate } from 'react-router-dom';
 import TssConf from "@app/modules/conf/TssGui.json";
 import productFeatures from '@app/modules/conf/Products.json';
 
-const Panel = ({ module, submodules, onModuleClick, onItemClick }) => {
-  const renderSubmodules = (submodules) => {
-    return (
-      <ul className="list-none space-y-2">
-        {submodules.map((submodule) => {
-          const icon = submodule.moduleIcon || 'fa fa-share';
-          return (
-            <li key={submodule.moduleId}>
-              <a
-                href="javascript:void(0);"
-                onClick={() => onItemClick(submodule)}
-                className="flex items-center gap-2 text-sm p-1 rounded hover:bg-gray-100 hover:text-blue-600 transition-colors"
-              >
-                <i className={`fa ${icon}`} style={{ width: '15px', fontSize: '12px' }}></i>
-                <span className="truncate">{submodule.moduleHeading}</span>
-              </a>
-              {submodule.submodules && submodule.submodules.length > 0 && (
-                <div className="pl-4">
-                  {renderSubmodules(submodule.submodules)}
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    );
-  };
+/* ────────────────────────────────────────────────────────────
+   Panel — used when PRODUCT_ID != 0 (single-product mode)
+   Shows a module header + flat list of sub-items
+   ──────────────────────────────────────────────────────────── */
+const Panel = ({ module, submodules, onItemClick }) => {
+  const renderItems = (items, depth = 0) =>
+    items.map((item) => {
+      const icon = item.moduleIcon || 'fa fa-circle';
+      return (
+        <li key={item.moduleId}>
+          <a
+            href="javascript:void(0);"
+            onClick={() => onItemClick(item)}
+            className="flex items-center gap-2 rounded transition-colors"
+            style={{
+              padding:    '0.25rem 0.375rem',
+              fontSize:   '0.8125rem',
+              color:      'var(--color-text-secondary)',
+              fontWeight: 400,
+              marginLeft: depth > 0 ? `${depth * 12}px` : 0,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--color-sidebar-hover)';
+              e.currentTarget.style.color = 'var(--color-primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+            }}
+          >
+            <i
+              className={icon}
+              style={{ width: '14px', fontSize: '10px', flexShrink: 0, opacity: 0.6 }}
+            />
+            <span className="truncate">{item.moduleHeading}</span>
+          </a>
+
+          {item.submodules && item.submodules.length > 0 && (
+            <ul className="list-none m-0 p-0">
+              {renderItems(item.submodules, depth + 1)}
+            </ul>
+          )}
+        </li>
+      );
+    });
 
   return (
-    <div className="tss-card">
-      <div className="tss-card-header" style={{ background: "#c4b0f3", color: "#fff" }}>
-        <a href="javascript:void(0);" id={module.moduleId} className="font-semibold">
+    <div className="tss-card flex flex-col h-full">
+      {/* Card header */}
+      <div
+        className="tss-card-header no-collapse"
+        style={{
+          background:  'var(--color-card-header-bg)',
+          borderBottom: '1px solid var(--color-card-border)',
+        }}
+      >
+        <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
           {module.moduleHeading}
-        </a>
+        </span>
       </div>
-      <div className="tss-card-body">
-        {renderSubmodules(submodules)}
+
+      {/* Card body */}
+      <div className="tss-card-body flex-1" style={{ padding: '0.75rem' }}>
+        <ul className="list-none m-0 p-0 space-y-0.5">
+          {renderItems(submodules)}
+        </ul>
       </div>
     </div>
   );
 };
 
-const SiteMap = () => {
-  const [modules, setModules] = useState([]);
-  const navigate = useNavigate();
-  const [productDetails, setProductDetails] = useState([]);
-  const username = localStorage.getItem("username");
-  const password = atob(localStorage.getItem("password"));
-  const acctId = localStorage.getItem("acctID");
-  const [hoveredProductId, setHoveredProductId] = useState(null);
+/* ────────────────────────────────────────────────────────────
+   Product card — used when PRODUCT_ID == 0 (hub mode)
+   ──────────────────────────────────────────────────────────── */
+const aliasLabelMap = {
+  BMP:        'Bulk Messaging',
+  Monitoring: 'AMS',
+  Analytics:  'Advanced Analytics',
+  MCA:        'Call Mgt Services',
+};
 
+const ProductCard = ({ product, onRedirect }) => {
+  const [hovered, setHovered] = useState(false);
+  const isDisabled = product.status == 0;
+  const label = aliasLabelMap[product.productName] || product.productName;
+  const features = productFeatures[product.productId] || [];
+
+  return (
+    <div
+      className="tss-card flex flex-col h-full cursor-pointer"
+      onClick={!isDisabled ? () => onRedirect(product.productUrl, product.productId) : undefined}
+      onMouseEnter={() => !isDisabled && setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        opacity:       isDisabled ? 0.45 : 1,
+        pointerEvents: isDisabled ? 'none' : 'auto',
+        transition:    'box-shadow 150ms ease, border-color 150ms ease',
+        boxShadow:     hovered ? 'var(--shadow-md)' : undefined,
+        borderColor:   hovered ? 'var(--color-primary)' : undefined,
+        minHeight:     '200px',
+      }}
+    >
+      {/* Header */}
+      <div
+        className="tss-card-header no-collapse"
+        style={{
+          borderBottom: '1px solid var(--color-card-border)',
+          justifyContent: 'center',
+        }}
+      >
+        <span style={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: '0.875rem' }}>
+          {label}
+        </span>
+        {isDisabled && (
+          <span
+            className="tss-badge tss-badge-neutral ml-auto"
+            style={{ fontSize: '0.625rem' }}
+          >
+            Unavailable
+          </span>
+        )}
+      </div>
+
+      {/* Body — image by default, features on hover */}
+      <div
+        className="tss-card-body flex-1 flex flex-col items-center justify-center"
+        style={{ padding: '1rem', position: 'relative', overflow: 'hidden', minHeight: '140px' }}
+      >
+        {!hovered ? (
+          <>
+            <img
+              src={`/images/${product.productName}.svg`}
+              alt={label}
+              style={{ maxHeight: '96px', maxWidth: '100%', objectFit: 'contain', marginBottom: '0.75rem' }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+            />
+            <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>
+              More info &rarr;
+            </span>
+          </>
+        ) : (
+          <div style={{ width: '100%', height: '100%' }}>
+            <p
+              style={{
+                fontSize:    '0.6875rem',
+                fontWeight:  600,
+                color:       'var(--color-primary)',
+                marginBottom: '0.375rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              Features
+            </p>
+            <ul
+              className="list-none m-0 p-0"
+              style={{ maxHeight: '120px', overflowY: 'auto' }}
+            >
+              {features.length > 0 ? features.map((f, i) => (
+                <li
+                  key={i}
+                  style={{
+                    display:      'flex',
+                    alignItems:   'flex-start',
+                    gap:          '0.375rem',
+                    fontSize:     '0.75rem',
+                    color:        'var(--color-text-secondary)',
+                    paddingBottom: '0.2rem',
+                    lineHeight:   '1.4',
+                  }}
+                >
+                  <span style={{ color: 'var(--color-primary)', flexShrink: 0, marginTop: '2px' }}>&#x2022;</span>
+                  <span>{f}</span>
+                </li>
+              )) : (
+                <li style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                  No features listed.
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ────────────────────────────────────────────────────────────
+   SiteMap — root component
+   ──────────────────────────────────────────────────────────── */
+const SiteMap = () => {
+  const [modules,        setModules]        = useState([]);
+  const [productDetails, setProductDetails] = useState([]);
+  const navigate = useNavigate();
+
+  const username  = localStorage.getItem('username');
+  const password  = atob(localStorage.getItem('password') ?? '');
+  const acctId    = localStorage.getItem('acctID');
+
+  /* Load modules (single-product mode) */
   useEffect(() => {
     const modulesJSON = localStorage.getItem('productModules');
     if (modulesJSON) {
-      try {
-        const parsedData = JSON.parse(modulesJSON);
-        setModules(parsedData);
-      } catch (error) {
-        // Error parsing data
-      }
+      try { setModules(JSON.parse(modulesJSON)); } catch { /* ignore */ }
     }
   }, []);
 
-  const handleModuleClick = (module) => {
-    // Add logic for module click if needed
-  };
-
-  const handleItemClick = (submodule) => {
-    if (submodule.modulePage) {
-      localStorage.setItem("moduleVersionType", submodule.versionType ? submodule.versionType : '0');
-      localStorage.setItem("modulePath", submodule.modulePathHierarchy ? submodule.modulePathHierarchy : '');
-      localStorage.setItem("moduleHeading", submodule.moduleHeading ? submodule.moduleHeading : '');
-      localStorage.setItem("manual", submodule.helpText ? submodule.helpText : '');
-      navigate(submodule.modulePage);
-    }
-  };
-
+  /* Fetch product list (hub mode) */
   useEffect(() => {
-    const fetchProductDetails = async () => {
+    const fetchProducts = async () => {
       try {
-        const response = await fetch(`${TssConf.SERVER_JS_API_URI}/productDetails?acctId=${acctId}&tenantCode=${localStorage.getItem("tenantCode")}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch product details');
-        }
-        const data = await response.json();
-        setProductDetails(data);
-      } catch (error) {
-        // Error fetching product details
-      }
+        const res = await fetch(
+          `${TssConf.SERVER_JS_API_URI}/productDetails?acctId=${acctId}&tenantCode=${localStorage.getItem('tenantCode')}`
+        );
+        if (!res.ok) throw new Error('Failed to fetch product details');
+        setProductDetails(await res.json());
+      } catch { /* ignore */ }
     };
-
-    fetchProductDetails();
+    fetchProducts();
   }, []);
 
-  const handleRedirect = async (Url, productId) => {
-    let productUrl = "";
+  /* Item navigation (single-product mode) */
+  const handleItemClick = (submodule) => {
+    if (!submodule.modulePage) return;
+    localStorage.setItem('moduleVersionType', submodule.versionType ?? '0');
+    localStorage.setItem('modulePath',        submodule.modulePathHierarchy ?? '');
+    localStorage.setItem('moduleHeading',     submodule.moduleHeading ?? '');
+    localStorage.setItem('manual',            submodule.helpText ?? '');
+    navigate(submodule.modulePage);
+  };
+
+  /* Product redirect (hub mode) */
+  const handleRedirect = async (url, productId) => {
     try {
-      const response = await fetch(`${TssConf.SERVER_JS_API_URI}/generateToken`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, password, productId })
+      const res = await fetch(`${TssConf.SERVER_JS_API_URI}/generateToken`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ username, password, productId }),
       });
+      if (!res.ok) throw new Error('Auth failed');
+      const { token } = await res.json();
 
-      if (!response.ok) {
-        throw new Error('Failed to authenticate');
-      }
-      const data = await response.json();
-      const { token } = data;
-      
-      productUrl = `${Url}?token=${token}`;
-     
       if (productId == 70 || productId == 90) {
-        productUrl = `${Url}`;  
-        window.open(productUrl, '_blank');
+        window.open(url, '_blank');
       } else {
-        productUrl = `${Url}?token=${token}`;
-        window.location.href = productUrl;
+        window.location.href = `${url}?token=${token}`;
       }
-    } catch (error) {
-      // Error during authentication
+    } catch { /* ignore */ }
+  };
+
+  /* ---- Render ---- */
+
+  /* Hub mode: PRODUCT_ID == '0' */
+  if (TssConf.PRODUCT_ID == '0') {
+    const visibleProducts = productDetails.filter(
+      (p) => p.productId !== TssConf.PRODUCT_ID
+    );
+
+    if (visibleProducts.length === 0) {
+      return (
+        <div className="flex items-center justify-center" style={{ minHeight: '360px' }}>
+          <div className="text-center">
+            <div
+              className="flex items-center justify-center w-12 h-12 rounded-full mx-auto mb-4"
+              style={{ backgroundColor: 'var(--color-primary-light)' }}
+            >
+              <i className="fas fa-inbox" style={{ color: 'var(--color-primary)', fontSize: '20px' }} />
+            </div>
+            <p className="tss-section-title mb-1">No Products Available</p>
+            <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-muted)' }}>
+              Your product catalog will appear here once configured.
+            </p>
+          </div>
+        </div>
+      );
     }
-  };
 
-  const aliasLabelMap = {
-    BMP: "Bulk Messaging",
-    Monitoring: "AMS",
-    Analytics: "Advanced Analytics",
-    MCA: "Call Mgt Services"	
-  };
+    return (
+      <div
+        className="grid gap-4"
+        style={{
+          gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+        }}
+      >
+        {visibleProducts.map((product) => (
+          <ProductCard
+            key={product.productId}
+            product={product}
+            onRedirect={handleRedirect}
+          />
+        ))}
+      </div>
+    );
+  }
 
+  /* Single-product mode: PRODUCT_ID != '0' */
   return (
-    <div>
-      {TssConf.PRODUCT_ID == '0' ? (
-        <div className="w-full">
-          {productDetails.length == 0 ? (
-            <div className="flex items-center justify-center py-24">
-              <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--color-primary-light)' }}>
-                  <i className="fas fa-inbox text-2xl" style={{ color: 'var(--color-primary)' }} />
-                </div>
-                <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>
-                  No Products Available
-                </h3>
-                <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-                  Your product catalog will appear here once configured.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {productDetails
-                .filter(product => product.productId !== TssConf.PRODUCT_ID)
-                .map(product => {
-                  const isDisabled = product.status == 0;
-
-                  return (
-                    <div
-                      key={product.productId}
-                      className="group"
-                    >
-                      <div
-                        className="tss-card cursor-pointer flex flex-col h-full transition-all duration-200 hover:shadow-lg"
-                        onClick={!isDisabled ? () => handleRedirect(product.productUrl, product.productId) : undefined}
-                        style={{
-                          opacity: isDisabled ? 0.5 : 1,
-                          pointerEvents: isDisabled ? 'none' : 'auto',
-                        }}
-                        onMouseEnter={() => setHoveredProductId(product.productId)}
-                        onMouseLeave={() => setHoveredProductId(null)}
-                      >
-                        {/* Card Header with Product Name */}
-                        <div className="tss-card-header border-b">
-                          <h3 className="font-bold text-center w-full" style={{ color: '#034694', fontWeight: 700 }}>
-                            {aliasLabelMap[product.productName] || product.productName}
-                          </h3>
-                        </div>
-
-                        {/* Card Body */}
-                        <div className="tss-card-body flex-1 flex flex-col items-center justify-center min-h-48 relative overflow-hidden">
-                          {hoveredProductId !== product.productId ? (
-                            <>
-                              <img
-                                src={`/images/${product.productName}.svg`}
-                                alt={product.productName}
-                                className="max-h-32 max-w-full object-contain mb-4"
-                              />
-                              <div className="text-center mt-auto">
-                                <a
-                                  href="javascript:void(0);"
-                                  className="inline-flex items-center gap-1 text-xs font-medium transition-colors"
-                                  style={{ color: '#6C6C6C' }}
-                                >
-                                  More info
-                                  <img src="/images/arrow.svg" alt="arrow" style={{ height: '12px' }} />
-                                </a>
-                              </div>
-                            </>
-                          ) : (
-                            <div className="w-full h-full flex flex-col justify-start p-3 bg-white bg-opacity-95">
-                              <h4 className="text-xs font-semibold mb-2" style={{ color: '#034694' }}>Features</h4>
-                              <ul className="text-xs space-y-1 overflow-y-auto flex-1">
-                                {(productFeatures[product.productId] || []).map((feature, index) => (
-                                  <li
-                                    key={index}
-                                    className="flex items-start gap-2"
-                                    style={{ color: '#034694' }}
-                                  >
-                                    <span className="text-xs mt-0.5">•</span>
-                                    <span className="line-clamp-2">{feature}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {modules.map((module) => (
-            <Panel
-              key={module.moduleId}
-              module={module}
-              submodules={module.submodules || []}
-              onModuleClick={handleModuleClick}
-              onItemClick={handleItemClick}
-            />
-          ))}
-        </div>
-      )}
+    <div
+      className="grid gap-4"
+      style={{
+        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+      }}
+    >
+      {modules.map((module) => (
+        <Panel
+          key={module.moduleId}
+          module={module}
+          submodules={module.submodules || []}
+          onItemClick={handleItemClick}
+        />
+      ))}
     </div>
   );
 };

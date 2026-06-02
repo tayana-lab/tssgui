@@ -21,7 +21,6 @@ const Header = () => {
   const navigate = useNavigate();
 
   const [manualPath, setManualPath] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
 
   /* ---- Navigation helpers ---- */
   const handleSitemap = () => {
@@ -45,9 +44,9 @@ const Header = () => {
     navigate('/fileUploadTracker');
   };
 
-  const handleToggleMenuSidebar = () => {
+  const handleToggleMenuSidebar = useCallback(() => {
     dispatch(toggleSidebarMenu());
-  };
+  }, [dispatch]);
 
   /* ---- Fetch product manual path ---- */
   useEffect(() => {
@@ -70,17 +69,12 @@ const Header = () => {
   /* ---- Manual download ---- */
   const downloadManual = async () => {
     if (!manualPath || manualPath === '' || manualPath === null) return;
-
     const cleanedFilePath = manualPath.replace(/^File:\//, '');
-    const filePath  = cleanedFilePath.split('/').slice(0, -1).join('/');
-    const fileName  = cleanedFilePath.substring(cleanedFilePath.lastIndexOf('/') + 1);
+    const filePath = cleanedFilePath.split('/').slice(0, -1).join('/');
+    const fileName = cleanedFilePath.substring(cleanedFilePath.lastIndexOf('/') + 1);
     const url = `${conf.SERVER_JS_API_URI}/download?filePath=${encodeURIComponent(filePath)}&fileName=${encodeURIComponent(fileName)}`;
-
     fetch(url)
-      .then((response) => {
-        if (response.ok) return response.blob();
-        throw new Error('Network response was not ok');
-      })
+      .then((r) => (r.ok ? r.blob() : Promise.reject('Bad response')))
       .then((blob) => {
         const fileURL = window.URL.createObjectURL(new Blob([blob]));
         const link = document.createElement('a');
@@ -90,97 +84,59 @@ const Header = () => {
         link.click();
         link.parentNode.removeChild(link);
       })
-      .catch((error) => console.error('Error downloading file:', error));
+      .catch((e) => console.error('Error downloading file:', e));
   };
 
   return (
-    <header
-      className="tss-topbar"
-      role="banner"
-    >
-      {/* ──────── LEFT ZONE: MENU + BRANDING ──────── */}
-      <div className="flex items-center gap-3 shrink-0">
-        {/* Hamburger/collapse button */}
+    <header className="tss-topbar" role="banner">
+
+      {/* ── LEFT: toggle + branding ── */}
+      <div className="flex items-center gap-2 shrink-0" style={{ minWidth: 0 }}>
         <button
           type="button"
           className="tss-topbar-icon-btn"
           onClick={handleToggleMenuSidebar}
           aria-label="Toggle sidebar"
-          title="Toggle sidebar"
         >
           <TssIcon iconKey="tss_bars" />
         </button>
 
-        {/* Product title */}
-        <div className="hidden sm:block">
-          <h1
-            className="text-sm font-bold leading-none select-none"
-            style={{ color: 'var(--color-primary)', fontWeight: 700 }}
-          >
-            {productTitle}
-          </h1>
-        </div>
+        <span
+          className="hidden sm:block text-sm font-semibold select-none truncate"
+          style={{ color: 'var(--color-primary)', maxWidth: '120px' }}
+        >
+          {productTitle}
+        </span>
       </div>
 
-      {/* ──────── CENTER ZONE: GLOBAL SEARCH ──────── */}
-      <div className="hidden md:flex flex-1 mx-6 max-w-md">
-        <div className="relative w-full">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="tss-search-input"
-            style={{
-              width: '100%',
-              padding: '0.375rem 0.75rem 0.375rem 2.25rem',
-              fontSize: '14px',
-              backgroundColor: 'var(--color-input-bg)',
-              color: 'var(--color-text)',
-              border: '1px solid var(--color-input-border)',
-              borderRadius: '6px',
-              transition: 'all 150ms ease',
-              outline: 'none',
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = 'var(--color-primary)';
-              e.target.style.boxShadow = '0 0 0 2px rgba(52, 125, 193, 0.1)';
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = 'var(--color-input-border)';
-              e.target.style.boxShadow = 'none';
-            }}
-          />
-          <TssIcon
-            iconKey="tss_search"
-            className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400"
-            size={16}
-          />
-        </div>
+      {/* ── CENTER: global search ── */}
+      <div className="hidden md:flex flex-1 justify-center px-4" style={{ maxWidth: '400px', margin: '0 auto' }}>
+        <SearchDropdown />
       </div>
 
-      {/* ──────── RIGHT ZONE: ACTIONS + UTILITY + USER ──────── */}
-      <div className="flex items-center gap-1 ml-auto">
-        {/* Sitemap shortcut */}
+      {/* ── RIGHT: actions + user ── */}
+      <div className="flex items-center gap-0.5 ml-auto shrink-0">
+
+        {/* Sitemap */}
         <button
           type="button"
-          className="tss-topbar-icon-btn hidden sm:flex"
+          className="tss-topbar-icon-btn hidden sm:inline-flex"
           onClick={handleSitemap}
           title={t('topnavi.title.siteMap')}
           aria-label={t('topnavi.title.siteMap')}
         >
-          <TssIcon iconKey="tss_sitemap" size={18} />
+          <TssIcon iconKey="tss_sitemap" size={16} />
         </button>
 
-        {/* Manual/Help */}
+        {/* Manual */}
         <button
           type="button"
-          className="tss-topbar-icon-btn hidden sm:flex"
+          className="tss-topbar-icon-btn hidden sm:inline-flex"
           onClick={downloadManual}
           title={t('topnavi.title.manual')}
           aria-label={t('topnavi.title.manual')}
         >
-          <TssIcon iconKey="tss_manual" size={18} />
+          <TssIcon iconKey="tss_manual" size={16} />
         </button>
 
         {/* Dashboard */}
@@ -192,7 +148,7 @@ const Header = () => {
             title={t('topnavi.title.dashboard')}
             aria-label={t('topnavi.title.dashboard')}
           >
-            <TssIcon iconKey="tss_dashboard" size={18} />
+            <TssIcon iconKey="tss_dashboard" size={16} />
           </button>
         )}
 
@@ -205,29 +161,35 @@ const Header = () => {
             title={t('topnavi.title.fileUploadTracker')}
             aria-label={t('topnavi.title.fileUploadTracker')}
           >
-            <TssIcon iconKey="tss_upload" size={18} />
+            <TssIcon iconKey="tss_upload" size={16} />
           </button>
         )}
 
-        {/* Language selector */}
+        {/* Divider */}
+        <div className="tss-topbar-divider mx-1" />
+
+        {/* Language */}
         {conf.DISPLAY_TRANSLATOR_ICON === true && (
           <LanguagesDropdown title={t('topnavi.title.language')} />
         )}
 
-        {/* Products dropdown */}
+        {/* Products */}
         {conf.DISPLAY_PRODUCTS_ICON === true && (
           <ProductsDropdown />
         )}
 
-        {/* Tenant selector */}
+        {/* Tenant */}
         <TenantDropdown />
 
-        {/* Themes/Dark mode */}
+        {/* Theme */}
         {conf.DISPLAY_THEMES_ICON === true && (
           <ThemesDropdown />
         )}
 
-        {/* User profile dropdown */}
+        {/* Divider */}
+        <div className="tss-topbar-divider mx-1" />
+
+        {/* User */}
         <UserDropdown />
       </div>
     </header>

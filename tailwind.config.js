@@ -58,14 +58,15 @@ export default {
       },
       spacing: {
         sidebar:       '240px',
-        'sidebar-sm':  '64px',
-        topbar:        '56px',
+        'sidebar-sm':  '56px',
+        topbar:        '44px',
       },
       boxShadow: {
-        card:    '0 1px 4px 0 rgba(0,0,0,0.10)',
-        topbar:  '0 1px 0 0 rgba(0,0,0,0.08)',
-        sidebar: '2px 0 8px 0 rgba(0,0,0,0.08)',
-        modal:   '0 8px 32px rgba(0,0,0,0.18)',
+        xs:      '0 1px 2px rgba(0,0,0,0.05)',
+        sm:      '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)',
+        md:      '0 4px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)',
+        lg:      '0 8px 24px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04)',
+        modal:   '0 20px 60px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.08)',
       },
       borderRadius: {
         card:  '8px',
