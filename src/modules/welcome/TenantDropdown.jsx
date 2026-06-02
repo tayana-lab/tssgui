@@ -24,7 +24,6 @@ const TenantDropdown = () => {
   const username        = (localStorage.getItem('username') || '').toLowerCase();
   const tenants         = dummyUserTenantMap[username] || [];
   const currentTenantId = parseInt(localStorage.getItem('selectedTenantId') || '0');
-  const currentName     = localStorage.getItem('selectedTenantName') || 'Tenant';
 
   const handleSwitch = (tenant) => {
     localStorage.setItem('selectedTenantId',   String(tenant.TENANT_ID));
@@ -39,7 +38,6 @@ const TenantDropdown = () => {
 
   return (
     <>
-      <div className="ml-4" />
       {showSwitchPage && (
         <TenantSelectPage
           tenants={tenants}
@@ -51,103 +49,118 @@ const TenantDropdown = () => {
         />
       )}
 
-      <li style={{ listStyle: 'none' }}>
-        <div
-          className="dropdown"
-          style={{ position: 'relative' }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+      <div
+        className="relative flex items-center"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Trigger button */}
+        <button
+          type="button"
+          className="tss-topbar-icon-btn"
+          title="Switch Tenant"
+          aria-label="Switch Tenant"
+          aria-haspopup="true"
+          aria-expanded={isHovered}
         >
-          {/* Topnav icon */}
-          <a style={{ fontWeight: 'normal', cursor: 'pointer' }} title="Switch Tenant">
-            <div className="mt-2">
-              <TssIcon iconKey="tss_tenantSwitch" title="Switch Tenant" />
-            </div>
-          </a>
+          <TssIcon iconKey="tss_tenantSwitch" title="Switch Tenant" />
+        </button>
 
-          {/* Dropdown panel */}
+        {/* Dropdown panel */}
+        {isHovered && (
           <div
-            className="dropdown-menu dropdown-menu-right"
-            style={{
-              position: 'absolute',
-              top: '18px',
-              right: '-4px',
-              left: 'auto',
-              minWidth: '240px',
-              background: 'linear-gradient(180deg, #FFFFFF 0%, #DFE8F9 100%)',
-              boxShadow: '0px 0px 4px 0px #00000040',
-              padding: '10px',
-              display: isHovered ? 'block' : 'none',
-              zIndex: 9999,
-            }}
+            className="tss-dropdown"
+            style={{ top: '36px', right: 0, position: 'absolute', minWidth: '240px' }}
+            role="menu"
+            aria-label="Tenant switcher"
           >
-            {/* Header */}
-            <div style={{
-              fontWeight: 'bold',
-              textAlign: 'center',
-              fontSize: '0.95rem',
-              color: '#3C5A94',
-              paddingBottom: '6px',
-              borderBottom: '2px solid #3C5A94',
-              marginBottom: '8px',
-            }}>
-              Switch Tenant
+            {/* Panel header */}
+            <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--color-border)' }}>
+              <p
+                className="text-xs font-semibold uppercase tracking-wider"
+                style={{ color: 'var(--color-text-muted)' }}
+              >
+                Switch Tenant
+              </p>
             </div>
 
-            {/* Tenant items */}
-            {tenants.map((tenant, idx) => {
-              const color      = avatarColors[idx % avatarColors.length];
-              const isCurrent  = tenant.TENANT_ID === currentTenantId;
-              const initials   = tenant.TENANT_NAME.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+            {/* Tenant list */}
+            <div className="p-2 flex flex-col gap-1">
+              {tenants.map((tenant, idx) => {
+                const color     = avatarColors[idx % avatarColors.length];
+                const isCurrent = tenant.TENANT_ID === currentTenantId;
+                const initials  = tenant.TENANT_NAME
+                  .split(' ')
+                  .map((w) => w[0])
+                  .slice(0, 2)
+                  .join('')
+                  .toUpperCase();
 
-              return (
-                <div
-                  key={tenant.TENANT_ID}
-                  onClick={() => !isCurrent && handleSwitch(tenant)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '8px 10px',
-                    borderRadius: '8px',
-                    cursor: isCurrent ? 'default' : 'pointer',
-                    background: isCurrent ? `${color}18` : 'transparent',
-                    border: isCurrent ? `1.5px solid ${color}` : '1.5px solid transparent',
-                    marginBottom: '4px',
-                    transition: 'background 0.15s',
-                  }}
-                  onMouseEnter={(e) => { if (!isCurrent) e.currentTarget.style.background = '#e3f0ff'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = isCurrent ? `${color}18` : 'transparent'; }}
-                >
-                  {/* Avatar */}
-                  <div style={{
-                    width: '34px', height: '34px', borderRadius: '50%',
-                    background: color, color: '#fff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 700, fontSize: '13px', flexShrink: 0,
-                  }}>
-                    {initials}
-                  </div>
+                return (
+                  <button
+                    key={tenant.TENANT_ID}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => !isCurrent && handleSwitch(tenant)}
+                    disabled={isCurrent}
+                    className="flex items-center gap-2.5 w-full rounded-md px-2.5 py-2 text-left transition-colors"
+                    style={{
+                      background: isCurrent
+                        ? `color-mix(in srgb, ${color} 10%, transparent)`
+                        : 'transparent',
+                      border: `1.5px solid ${isCurrent ? color : 'transparent'}`,
+                      cursor: isCurrent ? 'default' : 'pointer',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isCurrent) e.currentTarget.style.background = 'var(--color-table-row-hover)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = isCurrent
+                        ? `color-mix(in srgb, ${color} 10%, transparent)`
+                        : 'transparent';
+                    }}
+                  >
+                    {/* Avatar */}
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 text-white"
+                      style={{ backgroundColor: color }}
+                      aria-hidden="true"
+                    >
+                      {initials}
+                    </div>
 
-                  {/* Info */}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, color: '#1a237e', fontSize: '13px' }}>{tenant.TENANT_NAME}</div>
-                    <div style={{ fontSize: '11px', color: '#607d8b' }}>{tenant.TENANT_CODE}</div>
-                  </div>
+                    {/* Name + code */}
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className="text-xs font-semibold truncate"
+                        style={{ color: 'var(--color-text)' }}
+                      >
+                        {tenant.TENANT_NAME}
+                      </p>
+                      <p
+                        className="text-xs truncate"
+                        style={{ color: 'var(--color-text-muted)' }}
+                      >
+                        {tenant.TENANT_CODE}
+                      </p>
+                    </div>
 
-                  {/* Active badge */}
-                  {isCurrent && (
-                    <span style={{
-                      fontSize: '10px', background: color, color: '#fff',
-                      borderRadius: '10px', padding: '1px 8px', fontWeight: 600,
-                    }}>Active</span>
-                  )}
-                </div>
-              );
-            })}
+                    {/* Active badge */}
+                    {isCurrent && (
+                      <span
+                        className="text-xs font-semibold rounded-full px-2 py-0.5 text-white shrink-0"
+                        style={{ backgroundColor: color }}
+                      >
+                        Active
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </li>
+        )}
+      </div>
     </>
   );
 };
