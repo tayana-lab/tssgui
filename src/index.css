@@ -348,6 +348,21 @@ body {
     transform: rotate(-90deg);
   }
 
+  .tss-menu-section {
+    @apply flex flex-col py-2 first:pt-0;
+  }
+
+  .tss-menu-section-label {
+    @apply px-4 py-1.5 text-xs font-semibold uppercase tracking-widest select-none;
+    color: var(--color-text-muted);
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+  }
+
+  .tss-menu-section-items {
+    @apply flex flex-col;
+  }
+
   .tss-submenu {
     @apply overflow-hidden;
     transition: max-height 200ms ease, opacity 200ms ease;
@@ -372,10 +387,11 @@ body {
 
   /* ---- Content header (breadcrumb bar) ---- */
   .tss-content-header {
-    @apply flex items-center justify-between px-6 py-2 shrink-0;
+    @apply flex items-center justify-between px-6 py-1.5 shrink-0 border-b;
     background-color: var(--color-bg-alt);
-    border-bottom: 1px solid var(--color-border-subtle);
-    min-height: 40px;
+    border-color: var(--color-border-subtle);
+    min-height: 36px;
+    gap: 1rem;
   }
 
   /* ---- Footer ---- */
@@ -667,6 +683,28 @@ body {
   /* ---- Content body wrapper ---- */
   .tss-content-body {
     @apply p-6;
+  }
+
+  /* Responsive padding */
+  @media (max-width: 1024px) {
+    .tss-content-body {
+      @apply p-5;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .tss-content-body {
+      @apply p-4;
+    }
+  }
+
+  /* ---- Search bar styling ---- */
+  .tss-search-input {
+    background-color: var(--color-input-bg);
+    color: var(--color-text);
+  }
+  .tss-search-input::placeholder {
+    color: var(--color-text-muted);
   }
 
   /* ---- Search bar ---- */

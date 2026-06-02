@@ -3,7 +3,6 @@ import { Outlet } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleSidebarMenu, setWindowSize } from '@app/modules/common/default/store/reducers/ui';
 import Header from '@app/modules/welcome/HomePage_topnav';
-import Footer from '@app/modules/welcome/HomePage_footer';
 import HomePage_leftbar from '@app/modules/welcome/HomePage_leftbar';
 import TssContentHeader from '@app/modules/common/default/components/TssContentHeader';
 import TssConf from '@app/modules/conf/TssGui.json';
@@ -95,18 +94,21 @@ const Main = () => {
         {/* Breadcrumb / page-title bar */}
         <TssContentHeader />
 
-        {/* Scrollable page content */}
+        {/* Scrollable page content - use full remaining height */}
         <div
           className="flex-1 overflow-y-auto"
-          style={{ backgroundColor: 'var(--color-bg)' }}
+          style={{ 
+            backgroundColor: 'var(--color-bg)',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
         >
-          <div className="tss-content-body">
+          <div className="tss-content-body flex-1">
             <Outlet />
           </div>
         </div>
 
-        {/* Footer */}
-        <Footer />
+        {/* No footer - branding moved to sidebar */}
       </main>
 
       {/* ── Mobile sidebar backdrop ── */}

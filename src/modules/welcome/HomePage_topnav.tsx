@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { toggleSidebarMenu } from '@app/modules/common/default/store/reducers/ui';
 import TssIcon from '@app/modules/common/default/components/TssIcon';
 import SearchDropdown from '@app/modules/welcome/SearchDropdown';
@@ -21,6 +21,7 @@ const Header = () => {
   const navigate = useNavigate();
 
   const [manualPath, setManualPath] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   /* ---- Navigation helpers ---- */
   const handleSitemap = () => {
@@ -97,8 +98,9 @@ const Header = () => {
       className="tss-topbar"
       role="banner"
     >
-      {/* ---- Left section: hamburger + product title ---- */}
-      <div className="flex items-center gap-2 shrink-0">
+      {/* ──────── LEFT ZONE: MENU + BRANDING ──────── */}
+      <div className="flex items-center gap-3 shrink-0">
+        {/* Hamburger/collapse button */}
         <button
           type="button"
           className="tss-topbar-icon-btn"
@@ -109,46 +111,79 @@ const Header = () => {
           <TssIcon iconKey="tss_bars" />
         </button>
 
-        <h1
-          className="text-sm font-bold leading-none select-none"
-          style={{ color: 'var(--color-primary)', fontFamily: 'Gilroy-Bold, sans-serif' }}
-        >
-          {productTitle}
-        </h1>
+        {/* Product title */}
+        <div className="hidden sm:block">
+          <h1
+            className="text-sm font-bold leading-none select-none"
+            style={{ color: 'var(--color-primary)', fontFamily: 'Gilroy-Bold, sans-serif' }}
+          >
+            {productTitle}
+          </h1>
+        </div>
       </div>
 
-      {/* ---- Center section: quick nav icons ---- */}
-      <div className="flex items-center gap-1 ml-3">
-        {/* Sitemap */}
+      {/* ──────── CENTER ZONE: GLOBAL SEARCH ──────── */}
+      <div className="hidden md:flex flex-1 mx-6 max-w-md">
+        <div className="relative w-full">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="tss-search-input"
+            style={{
+              width: '100%',
+              padding: '0.375rem 0.75rem 0.375rem 2.25rem',
+              fontSize: '14px',
+              backgroundColor: 'var(--color-input-bg)',
+              color: 'var(--color-text)',
+              border: '1px solid var(--color-input-border)',
+              borderRadius: '6px',
+              transition: 'all 150ms ease',
+              outline: 'none',
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = 'var(--color-primary)';
+              e.target.style.boxShadow = '0 0 0 2px rgba(52, 125, 193, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = 'var(--color-input-border)';
+              e.target.style.boxShadow = 'none';
+            }}
+          />
+          <TssIcon
+            iconKey="tss_search"
+            className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400"
+            size={16}
+          />
+        </div>
+      </div>
+
+      {/* ──────── RIGHT ZONE: ACTIONS + UTILITY + USER ──────── */}
+      <div className="flex items-center gap-1 ml-auto">
+        {/* Sitemap shortcut */}
         <button
           type="button"
-          className="tss-topbar-icon-btn px-2 h-auto py-1"
-          style={{ flexDirection: 'column', gap: '2px' }}
+          className="tss-topbar-icon-btn hidden sm:flex"
           onClick={handleSitemap}
           title={t('topnavi.title.siteMap')}
           aria-label={t('topnavi.title.siteMap')}
         >
-          <TssIcon iconKey="tss_sitemap" size={14} />
-          <span style={{ fontSize: '9px', lineHeight: 1 }}>{t('SiteMap')}</span>
+          <TssIcon iconKey="tss_sitemap" size={18} />
         </button>
 
-        {/* Manual */}
+        {/* Manual/Help */}
         <button
           type="button"
-          className="tss-topbar-icon-btn px-2 h-auto py-1"
-          style={{ flexDirection: 'column', gap: '2px' }}
+          className="tss-topbar-icon-btn hidden sm:flex"
           onClick={downloadManual}
           title={t('topnavi.title.manual')}
           aria-label={t('topnavi.title.manual')}
         >
-          <TssIcon iconKey="tss_manual" size={14} />
-          <span style={{ fontSize: '9px', lineHeight: 1 }}>{t('topnavi.label.manual')}</span>
+          <TssIcon iconKey="tss_manual" size={18} />
         </button>
-      </div>
 
-      {/* ---- Right section: utility icons + user ---- */}
-      <div className="flex items-center gap-1 ml-auto">
-        {/* Dashboard icon */}
+        {/* Dashboard */}
         {conf.DISPLAY_DASHBOARD_ICON === true && (
           <button
             type="button"
@@ -157,25 +192,8 @@ const Header = () => {
             title={t('topnavi.title.dashboard')}
             aria-label={t('topnavi.title.dashboard')}
           >
-            <TssIcon iconKey="tss_dashboard" />
+            <TssIcon iconKey="tss_dashboard" size={18} />
           </button>
-        )}
-
-        {/* Language */}
-        {conf.DISPLAY_TRANSLATOR_ICON === true && (
-          <LanguagesDropdown title={t('topnavi.title.language')} />
-        )}
-
-        {/* Products */}
-        {conf.DISPLAY_PRODUCTS_ICON === true && (
-          <ProductsDropdown />
-        )}
-
-        <TenantDropdown />
-
-        {/* Themes */}
-        {conf.DISPLAY_THEMES_ICON === true && (
-          <ThemesDropdown />
         )}
 
         {/* File upload tracker */}
@@ -187,11 +205,29 @@ const Header = () => {
             title={t('topnavi.title.fileUploadTracker')}
             aria-label={t('topnavi.title.fileUploadTracker')}
           >
-            <TssIcon iconKey="tss_upload" />
+            <TssIcon iconKey="tss_upload" size={18} />
           </button>
         )}
 
-        {/* User dropdown */}
+        {/* Language selector */}
+        {conf.DISPLAY_TRANSLATOR_ICON === true && (
+          <LanguagesDropdown title={t('topnavi.title.language')} />
+        )}
+
+        {/* Products dropdown */}
+        {conf.DISPLAY_PRODUCTS_ICON === true && (
+          <ProductsDropdown />
+        )}
+
+        {/* Tenant selector */}
+        <TenantDropdown />
+
+        {/* Themes/Dark mode */}
+        {conf.DISPLAY_THEMES_ICON === true && (
+          <ThemesDropdown />
+        )}
+
+        {/* User profile dropdown */}
         <UserDropdown />
       </div>
     </header>
